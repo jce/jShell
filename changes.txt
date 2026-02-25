@@ -1,0 +1,33 @@
+0.2.4
+- RTC has a proper read and set command.
+0.2.3
+- RTC readout in burst mode
+0.2.2
+- Rudimentary RTC read
+0.2.1
+- Interrupt stability fix
+0.2.0
+- Some odd thing, setting parity bit 1 in the SIO results in communication breaking down or jumbling
+  at high data rates. Disabling it (even tough at the PC side it is enabled) fixes the communication.
+  It seems SCM also has this configuration and i cannot find any example code that has this bit enabled.
+  So, i also disable it and hope for the best...
+- Hexloader works. relocatable code. Gets moved over the stack upon execution. Command "hexload" or "hl".
+  This can overwrite the program without bootloader. 
+- new command "sp", shows the current stack pointer.
+0.1.10
+- hexload, hl: new function that takes one line of hexfile and writes that to memory.
+0.1.9
+- interrupts changed from IM1 to IM2, vector embedded at the start of the program. Stable with SCM.
+- EX and EXX instructions for switching register context. Prevents blinking during typing when pwm is
+  disabled.
+- Bugfix: some commands would not be checked.
+0.1.8
+- jShell runs on SIO interrupts, injected in the bootloader. So not a stable version.
+0.1.7
+- Injects interrupt handler at 0x0038, enables IM 1, shows serial notification of interrupt.
+0.1.6
+- Backspace works
+- "ret" command added: returns from jShell.
+- Copy error text updated
+0.1.5
+- pwm [on/off] command added, enables or disables the pwm blinking animation on the out0 leds.

@@ -1,0 +1,5 @@
+#!/bin/bash
+../zasm/zasm main.asm -x --z80 --target=ram
+./sar.py main.hex
+rm main.hex
+rm main.lst
