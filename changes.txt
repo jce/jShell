@@ -1,3 +1,6 @@
+0.2.6
+- function to glue together arguments: LCD cannow contain empty lines and multiple spaces.
+- log file with circular buffer. Logs startups, shutdowns and log-command entries.
 0.2.5
 - lcd command now looks at the line number
 - clock is now displayed at the screen

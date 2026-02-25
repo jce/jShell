@@ -1,7 +1,7 @@
 jshellname:
     .db 'jShell', 0
 jshellver:
-    .db '0.2.5', 0
+    .db '0.2.6', 0
 jshellprompt:
     .db ">", 0
 
@@ -23,6 +23,7 @@ chl:   .db "hl", 0
 chexload:.db "hexload", 0
 csp:   .db "sp", 0
 cclock:.db "clock", 0
+clog:  .db "log", 0
 commands:
     .dw c_,     help
     .dw cls,    help
@@ -42,6 +43,7 @@ commands:
     .dw chexload,fhexload
     .dw csp,    fsp
     .dw cclock, clock
+    .dw clog,   log
     .db 0, 0
 
 error:
@@ -71,6 +73,8 @@ help:
     ld hl, helpe        \ call sio_prstr_nl
     ld hl, helpf        \ call sio_prstr_nl
     ld hl, helpg        \ call sio_prstr_nl
+    ld hl, helph        \ call sio_prstr_nl
+    ld hl, helpi        \ call sio_prstr_nl
     ret
 help0: .db "Help function.", 0
 help1: .db " ", 0
@@ -88,11 +92,116 @@ helpc: .db "pwm [on/off] turns the blinking animation on out0 on or off.", 0
 helpd: .db "ret - Returns from jshell (exit).", 0
 helpe: .db "hl, hexload - starts the hexloader.", 0
 helpf: .db "sp - print the current stack pointer value.", 0
-helpg: .db "clock - No parameters: Tell date and time. 6 parameters: Configure date and time: day month year hour minute second", 0
+helpg: .db "clock - No parameters: Tell date and time. 6 parameters: Configure date and time: day month year hour minute second.", 0
+helph: .db "log [arguments] - No arguments: Show log file. Arguments: Add to log file.", 0
+helpi: .db "log init [location 0-FFFF] [size 0-FFFF] - Initialize the logfile.", 0
 
 ; A command gets argc in e and argv in hl
 
+; yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy
+log:
+    ld a, e         ; Hunt for "log" (no arguments)
+    cp 1
+    jr nz, log_with_arguments
+    call log_show
+    ret
 
+log_with_arguments:
+    ld a, e         ; Hunt for "log init aaaa bbbb"
+    cp 4            ; 4 words? 
+    jr nz, log_not_init ; No? not log init.
+    push hl         ; Remember hl
+    push de         ; Remember de
+    inc hl          ; Increment to word 1 (counting from 0)
+    inc hl          ;
+    ld de, (hl)     ; Get the string pointer from argv
+    ld hl, de       ;
+    ld de, str_init ;
+    call strcmp     ; Compare to "init"
+    pop de    
+    pop hl
+    jr nz, log_not_init ; No? Not log init.
+                    ; Okay, we are satisfied that it is "log init"
+    inc hl          ; Increment to second parameter.
+    inc hl          ; 
+    inc hl          ; 
+    inc hl          ; 
+    push hl         ;
+    ld bc, (hl)     ; Read the string pointer from
+    ld hl, bc       ;   argv.
+    call hstoui16   ; Reads uint16 from hl, outputs to de.
+    ld bc, de       ; Remember the result in bc
+    pop hl
+
+    inc hl          ; Increment to third parameter.
+    inc hl          ; 
+    ld de, (hl)     ; Read the string pointer from
+    ld hl, de       ;   argv.
+    call hstoui16   ; Reads uint16 from hl, outputs to de.
+    ld hl, bc       ; Remember bc
+
+    call log_init
+
+    ret
+
+log_not_init:
+    inc hl
+    inc hl
+    dec e
+    call merge_arguments
+
+    ld de, (hl)
+    ld hl, de
+    call log_add
+    ret
+
+; function that merges arguments 0-n, changing intermediate
+; zeroes for spaces. Very un unix, to first separate the arguments
+; to just later glue them back together. Anyways... 
+; e - argc
+; hl - argv
+merge_arguments:
+    ld a, e         ; Test for 0 or 1 arguments
+    cp 0            ;
+    ret z           ;
+    cp 1
+    ret z
+
+    push hl
+    push de
+    push bc
+    ld bc, (hl)     ; store start pointer in bc
+    dec e           ; need the one but last pointer, to the last item
+merge_arguments_end_loop:
+    inc hl
+    inc hl
+    dec e
+    jr nz, merge_arguments_end_loop
+    ld de, (hl)     ; store the pointer in hl
+    ld hl, de
+    or a            ; carry needs to be 0
+    sbc hl, bc      ; subtract begin from end, hl is now length
+    ld de, hl       ; store in de
+
+merge_arguments_replace_loop:
+    ld a, (bc)
+    cp 0
+    jr nz, merge_arguments_pass
+    ld hl, bc
+    ld (hl), ' '
+merge_arguments_pass:
+    inc bc
+    dec de
+    ld a, d
+    or e
+    jr nz, merge_arguments_replace_loop    
+
+    pop bc
+    pop de
+    pop hl
+    ret
+
+str_init: .db "init", 0
 ; xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 clock:
     ld a, e
@@ -510,7 +619,7 @@ testbuf:
 ; e is argc, hl is argv
 lcd:
     ld a, e                 ; Complain if not enough arguments
-    cp 3
+    cp 2
     jp c, lcd_toofew 
 
     inc hl
@@ -525,39 +634,28 @@ lcd:
     cp 4                    ; Complain if line is 4 or higher
     jp nc, lcd_notline
 
-    ;inc hl
-    ;inc hl                  ; Increment to next commandline parameter
+    inc hl
+    inc hl                  ; Increment to next commandline parameter
     dec e
     dec e                   ; Update e for 2 removed parameters
 
     call lcd_clear_line
     call lcd_goto_line
 
-lcd_loop:
+    ld a, e                 ; If there are no more arguments
+    cp 0                    ; clear the line and 
+    jr z, lcd_end           ; done.
 
-    ld a, e                 ; Count down over the arguments
-    or a
-    jp z, lcd_end    
-    dec e
-
-    inc hl                  ;
-    inc hl                  ; Increment to next commandline parameter
-
-    push hl                 ;
-    push de                 ;
-    ld de, (hl)             ; At hl is a pointer to a string located
-    ld hl, de               ;
+    call merge_arguments    ; Merge arguments from this position (e, hl)
+    push hl
+    push de
+    ld de, (hl)
+    ld hl, de
     call lcd_write_string   ; Write that string to the lcd
     pop de                  ;
     pop hl                  ;
     
-    ld a, e                 ;
-    or e                    ; Test if this is the last iteration
-    jr z, lcd_loop          ;
-    ld b, ' '               ; Add a space between the words
-    call lcd_wrd            ;
-
-    jr lcd_loop             ;
+    jr lcd_end              ;
 
 lcd_end:
     ld hl, lcd_ok_text

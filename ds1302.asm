@@ -47,7 +47,8 @@ ctime:
     pop ix
     pop af
     ret
-ctime_buf: .block 20
+;ctime_buf: .block 20
+ctime_buf: .db "00-00-2000 00:00:00",0
 
 ; ====================================================
 ; logic block that assumes registers are all ours

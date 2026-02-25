@@ -1,4 +1,4 @@
-.ORG $000
+.ORG $8000
 
     jr proginit ; at 0x8000
 
@@ -8,6 +8,7 @@ proginit:
     call lcd_init
     call lcd_clear
     call ds1302_init
+    call log_startup       ; needs to be after the clock init
 
     ld b, 13
     call sio_prchr
@@ -39,7 +40,7 @@ proginit:
     call sio_prstr
 
     ; Init interrupts, offset at 0x80
-    ld a, 0x00
+    ld a, 0x80
     ld i, a
     IM 2
     ei
@@ -114,5 +115,6 @@ run_enabled: .db 1
 #include "hstoui.asm"
 #include "hexload.asm"
 #include "ds1302.asm"
+#include "log.asm"
 
 .END
