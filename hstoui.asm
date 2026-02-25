@@ -1,5 +1,45 @@
-; Hexadecimal string of hexadecimal number to uint8
-; hl - pointer to first character of null terminated input string
+; File of conversion functions
+
+; unsigned integer 4bits to hex string
+; a - integer [0-15]
+; hl - pointer to string where to write the character. Will be incremented once.
+ui4tohs:
+    cp 10
+    jp c, ui4tohs_09
+    add 'A' - 10
+    ld (hl), a
+    inc hl
+    ret
+ui4tohs_09:
+    add '0'
+    ld (hl), a
+    inc hl
+    ret
+
+; Same as ui4tohs, but for uint8. Writes 2 hex numbers.
+ui8tohs:
+    push bc
+    ld b, a
+    srl a
+    srl a
+    srl a
+    srl a
+    call ui4tohs
+    ld a, b
+    and 0b00001111
+    call ui4tohs
+    pop bc
+    ret
+
+; Convert uint16 to 4 hex numbers
+; hl - pointer where to write. Gets incremented.
+; de - uint16 value
+ui16tohs:
+    ld a, d
+    call ui8tohs
+    ld a, e
+    call ui8tohs
+    ret
 
 ; Convert four characters in a string to uint16
 ; hl contains the string pointer

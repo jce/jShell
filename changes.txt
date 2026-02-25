@@ -1,3 +1,8 @@
+0.2.5
+- lcd command now looks at the line number
+- clock is now displayed at the screen
+- clock prints time to a string, this is used in the command but also on the screen
+- firmware update now displays 'r' when it resets the system
 0.2.4
 - RTC has a proper read and set command.
 0.2.3

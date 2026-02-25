@@ -1,4 +1,4 @@
-.ORG $0000
+.ORG $000
 
     jr proginit ; at 0x8000
 
@@ -8,6 +8,11 @@ proginit:
     call lcd_init
     call lcd_clear
     call ds1302_init
+
+    ld b, 13
+    call sio_prchr
+    ld b, 10
+    call sio_prchr
 
     ld hl, jshellname
     call lcd_write_string
@@ -44,6 +49,33 @@ proginit:
 
     ld c, 0
 mainloop:
+    call main_pwm
+    ;call jshell
+    call main_clock
+
+    ld a, (run_enabled)
+    or a
+    jr nz, mainloop
+    ret
+
+main_clock:
+    ld a, (main_clock_ctr)
+    dec a
+    or a
+    ld b, a
+    jr nz, main_clock_pass
+    ld b, 0xff
+    call ctime
+    ld a, 1
+    call lcd_goto_line
+    call lcd_write_string
+main_clock_pass:
+    ld a, b
+    ld (main_clock_ctr), a
+    ret
+main_clock_ctr: .db 1
+
+main_pwm:
     ld a, (pwm_enabled)
     or a
     jr z, pwm_enable_pass
@@ -56,12 +88,6 @@ mainloop:
     inc c
     inc c
 pwm_enable_pass:
-
-    ;call jshell
-
-    ld a, (run_enabled)
-    or a
-    jr nz, mainloop
     ret
 
 main_enablepwm:

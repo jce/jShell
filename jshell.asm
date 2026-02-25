@@ -1,7 +1,7 @@
 jshellname:
     .db 'jShell', 0
 jshellver:
-    .db '0.2.4', 0
+    .db '0.2.5', 0
 jshellprompt:
     .db ">", 0
 
@@ -105,37 +105,8 @@ clock:
     ret
 
 clock_print_time:
-    call ds1302_read
-    ld hl, clock_s
-    call sio_prstr
-
-    ld ix, ds1302_rv
-
-    ld a, (ix+3)
-    call sio_uint8_hex
-    ld b, '-'
-    call sio_prchr    
-    ld a, (ix+4)
-    call sio_uint8_hex
-    ld b, '-'
-    call sio_prchr
-    ld a, 0x20
-    call sio_uint8_hex   
-    ld a, (ix+6)
-    call sio_uint8_hex
-    ld b, ' '
-    call sio_prchr
-
-    ld a, (ix+2)
-    call sio_uint8_hex
-    ld b, ':'
-    call sio_prchr    
-    ld a, (ix+1)
-    call sio_uint8_hex
-    ld b, ':'
-    call sio_prchr    
-    ld a, (ix+0)
-    call sio_uint8_hex_nl
+    call ctime
+    call sio_prstr_nl
     ret
 
 clock_set_time:
@@ -489,6 +460,7 @@ test:
     call sio_prstr
     ld hl, de
 
+
 test_argument:
     push hl
     ld de, (hl)
@@ -509,6 +481,19 @@ test_argument:
     ld hl, de
     call sio_uint16_hex
 
+    ld hl, testbuf
+    ld a, 0x9
+    call ui4tohs
+    ld a, 0xA
+    call ui4tohs
+    ld a, 0x65
+    call ui8tohs
+    ld de, 0xDEAD
+    call ui16tohs
+    ld (hl), 0
+    ld hl, testbuf
+    call sio_prstr_nl
+
     ret
 
 teststr:
@@ -517,6 +502,8 @@ newlinestr:
     .db 13, 10, 0
 x:
     .db "1234",0
+testbuf:
+    .block 20
 
 ; ----------------------------------------------------------------------------------------------
 ; LCD write function
@@ -543,6 +530,8 @@ lcd:
     dec e
     dec e                   ; Update e for 2 removed parameters
 
+    call lcd_clear_line
+    call lcd_goto_line
 
 lcd_loop:
 

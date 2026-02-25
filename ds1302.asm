@@ -7,6 +7,47 @@ ds1302_init:
     out (ds1302reg), a
     ret    
 
+; ctime returns a char* to a string that contains the current datetime.
+ctime:
+    push af
+    push ix
+    call ds1302_read
+    ld ix, ds1302_rv
+    ld hl, ctime_buf
+
+    ld a, (ix+3)
+    call ui8tohs
+    ld (hl), '-'
+    inc hl   
+    ld a, (ix+4)
+    call ui8tohs
+    ld (hl), '-'
+    inc hl
+    ld (hl), '2'
+    inc hl
+    ld (hl), '0'
+    inc hl
+    ld a, (ix+6)
+    call ui8tohs
+    ld (hl), ' '
+    inc hl
+
+    ld a, (ix+2)
+    call ui8tohs
+    ld (hl), ':'
+    inc hl
+    ld a, (ix+1)
+    call ui8tohs
+    ld (hl), ':'
+    inc hl   
+    ld a, (ix+0)
+    call ui8tohs
+    ld (hl), 0
+    ld hl, ctime_buf
+    pop ix
+    pop af
+    ret
+ctime_buf: .block 20
 
 ; ====================================================
 ; logic block that assumes registers are all ours

@@ -121,6 +121,10 @@ hexload_pass_7:
 	jr hexload_start_2		; Jump to hexload_start
 
 hexload_pass_7_end:
+;-----------------------------------------------
+	ld a, 'r' 
+    out (0x81), a
+;-----------------------------------------------
     rst 0
 
 hexload_pass_9:
