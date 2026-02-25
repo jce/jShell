@@ -25,12 +25,21 @@ log_startup:
     call log_addch
     ld hl, jshellver
     call log_add_str
+
+    ld a, ' '
+    call log_addch
+    ld de, init
+    ld hl, log_buf
+    call ui16tohs
+    call log_add_str
+
     ld a, 13
     call log_addch
     ld a, 10
     call log_addch
 
     ret
+log_buf: .db "0000",0
 log_shutdown_str: .db "Shutdown",0
 log_startup_str: .db "Startup ",0
     

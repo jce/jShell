@@ -35,10 +35,12 @@ ui8tohs:
 ; hl - pointer where to write. Gets incremented.
 ; de - uint16 value
 ui16tohs:
+    push hl
     ld a, d
     call ui8tohs
     ld a, e
     call ui8tohs
+    pop hl
     ret
 
 ; Convert four characters in a string to uint16

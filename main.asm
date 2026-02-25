@@ -1,4 +1,6 @@
-.ORG $8000
+.ORG $0000
+init:
+int_offs equ 0x00
 
     jr proginit ; at 0x8000
 
@@ -9,6 +11,7 @@ proginit:
     call lcd_clear
     call ds1302_init
     call log_startup       ; needs to be after the clock init
+    call SIO_A_RESET
 
     ld b, 13
     call sio_prchr
@@ -22,25 +25,22 @@ proginit:
     ld hl, jshellver
     call lcd_write_string
 
-    call SIO_A_RESET
-
     ld hl, jshellname
     call sio_prstr
     ld b, ' '
     call sio_prchr
     ld hl, jshellver
     call sio_prstr
-
-    ld b, 13
+    ld b, ' '
     call sio_prchr
-    ld b, 10
-    call sio_prchr
+    ld hl, init
+    call sio_uint16_hex_nl
 
     ld hl, jshellprompt
     call sio_prstr
 
     ; Init interrupts, offset at 0x80
-    ld a, 0x80
+    ld a, int_offs
     ld i, a
     IM 2
     ei
@@ -116,5 +116,7 @@ run_enabled: .db 1
 #include "hexload.asm"
 #include "ds1302.asm"
 #include "log.asm"
+#include "memview.asm"
+#include "stackframe.asm"
 
 .END

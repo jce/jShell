@@ -1,3 +1,7 @@
+0.2.7
+- now 20 arguments are allowed (instead of 10).
+- start address is displayed on startup
+- stack frame experiment function added (no content yet)
 0.2.6
 - function to glue together arguments: LCD cannow contain empty lines and multiple spaces.
 - log file with circular buffer. Logs startups, shutdowns and log-command entries.

@@ -1,7 +1,7 @@
 jshellname:
     .db 'jShell', 0
 jshellver:
-    .db '0.2.6', 0
+    .db '0.2.7', 0
 jshellprompt:
     .db ">", 0
 
@@ -24,6 +24,8 @@ chexload:.db "hexload", 0
 csp:   .db "sp", 0
 cclock:.db "clock", 0
 clog:  .db "log", 0
+csf1:  .db "sf", 0
+csf2:  .db "stackframe", 0
 commands:
     .dw c_,     help
     .dw cls,    help
@@ -44,6 +46,8 @@ commands:
     .dw csp,    fsp
     .dw cclock, clock
     .dw clog,   log
+    .dw csf1,   stackframe
+    .dw csf2,   stackframe
     .db 0, 0
 
 error:
@@ -75,6 +79,7 @@ help:
     ld hl, helpg        \ call sio_prstr_nl
     ld hl, helph        \ call sio_prstr_nl
     ld hl, helpi        \ call sio_prstr_nl
+    ld hl, helpj        \ call sio_prstr_nl
     ret
 help0: .db "Help function.", 0
 help1: .db " ", 0
@@ -95,6 +100,7 @@ helpf: .db "sp - print the current stack pointer value.", 0
 helpg: .db "clock - No parameters: Tell date and time. 6 parameters: Configure date and time: day month year hour minute second.", 0
 helph: .db "log [arguments] - No arguments: Show log file. Arguments: Add to log file.", 0
 helpi: .db "log init [location 0-FFFF] [size 0-FFFF] - Initialize the logfile.", 0
+helpj: .db "stackframe, sf - Experiment with stackframe technique(s).", 0
 
 ; A command gets argc in e and argv in hl
 
@@ -479,17 +485,20 @@ read:
     ; now we have
     ; bc - from where
     ; de - length
-
     ld hl, bc
-read_loop:
-    ld a, d                 ;
-    or e                    ; Return if de is zero
-    ret z
-    ld a, (hl)
-    call sio_uint8_hex_nl
-    inc hl
-    dec de
-    jr read_loop
+    call view
+    ret
+
+;    ld hl, bc
+;read_loop:
+;    ld a, d                 ;
+;    or e                    ; Return if de is zero
+;    ret z
+;    ld a, (hl)
+;    call sio_uint8_hex_nl
+;    inc hl
+;    dec de
+;    jr read_loop
 
 read_toofew_f:
     ld hl, read_toofew
@@ -916,9 +925,9 @@ buflen:
 bufmaxlen equ 200
 
 argv:
-    .block 20
+    .block 40
 argvw:
     .dw argv
 argvlen:
     .db 0
-argvmaxlen equ 10
+argvmaxlen equ 20
