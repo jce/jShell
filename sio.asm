@@ -152,11 +152,13 @@ sio_uint16_hex:
     ret
 
 sio_uint8_hex_nl:
+    push af
     push hl
     call sio_uint8_hex
     ld hl, sio_newline
     call sio_prstr
     pop hl
+    pop af
     ret
 
 ; print hexadecimal uint8_t

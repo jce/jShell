@@ -11,6 +11,7 @@ def upload_hex(hexfile, ser):
             bytes = bytearray(line, encoding="utf-8") + b'\r'
             ser.write(bytes)
             print(bytes)
+            time.sleep(0.001)
 
     print(f"Hex file '{hexfile}' uploaded successfully!")
 

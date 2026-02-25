@@ -1,12 +1,13 @@
-.ORG $0000
+.ORG $8000
 init:
-int_offs equ 0x00
+int_offs .equ 0x80
 
     jr proginit ; at 0x8000
 
 .dw sio_isr     ; at 0x8002
 
 proginit:
+    ld sp, 0x0
     call lcd_init
     call lcd_clear
     call ds1302_init
@@ -23,6 +24,15 @@ proginit:
     ld b, ' '
     call lcd_wrd
     ld hl, jshellver
+    call lcd_write_string
+    ld b, ' '
+    call lcd_wrd
+
+    ld hl, ctime_buf        ; Hack, who needs a clock buffer now?
+    ld de, init
+    call ui16tohs
+    ld a, 0
+    ld (ctime_buf + 4), a
     call lcd_write_string
 
     ld hl, jshellname

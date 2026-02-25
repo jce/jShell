@@ -1,0 +1,1 @@
+Hobby project to learn to code assembly. It uses the RC2014 computer kit. It provides a simple shell like SCM (Small Computer Monitor) but without the awesome debugging features. For the actual features list, please see changes.txt

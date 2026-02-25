@@ -1,3 +1,7 @@
+0.2.8
+- Stack frame experiment(s)
+- LCD now also shows start address.
+- Added small delay in hex file downloader, to search for why firmware updates go wrong sometime.
 0.2.7
 - now 20 arguments are allowed (instead of 10).
 - start address is displayed on startup
