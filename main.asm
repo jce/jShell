@@ -1,6 +1,6 @@
-.ORG $8000
+.ORG $000
 init:
-int_offs .equ 0x80
+int_offs .equ 0x0
 
     jr proginit ; at 0x8000
 
@@ -9,7 +9,6 @@ int_offs .equ 0x80
 proginit:
     ld sp, 0x0
     call lcd_init
-    call lcd_clear
     call ds1302_init
     call log_startup       ; needs to be after the clock init
     call SIO_A_RESET
@@ -33,6 +32,7 @@ proginit:
     call ui16tohs
     ld a, 0
     ld (ctime_buf + 4), a
+    ld hl, ctime_buf
     call lcd_write_string
 
     ld hl, jshellname
@@ -115,6 +115,7 @@ main_disablepwm:
 pwm_enabled: .db 1
 run_enabled: .db 1
 
+#include "stackframe.asm"
 #include "math.asm"
 #include "pwm.asm"
 #include "sio.asm"
@@ -127,6 +128,6 @@ run_enabled: .db 1
 #include "ds1302.asm"
 #include "log.asm"
 #include "memview.asm"
-#include "stackframe.asm"
+#include "dump.asm"
 
 .END

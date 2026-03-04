@@ -18,6 +18,7 @@ ui4tohs_09:
 
 ; Same as ui4tohs, but for uint8. Writes 2 hex numbers.
 ui8tohs:
+    push af
     push bc
     ld b, a
     srl a
@@ -29,18 +30,19 @@ ui8tohs:
     and 0b00001111
     call ui4tohs
     pop bc
+    pop af
     ret
 
 ; Convert uint16 to 4 hex numbers
 ; hl - pointer where to write. Gets incremented.
 ; de - uint16 value
 ui16tohs:
-    push hl
+    push af
     ld a, d
     call ui8tohs
     ld a, e
     call ui8tohs
-    pop hl
+    pop af
     ret
 
 ; Convert four characters in a string to uint16

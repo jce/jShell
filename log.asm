@@ -30,7 +30,9 @@ log_startup:
     call log_addch
     ld de, init
     ld hl, log_buf
+    push hl
     call ui16tohs
+    pop hl
     call log_add_str
 
     ld a, 13

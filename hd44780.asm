@@ -4,29 +4,6 @@ creg equ    218 ; control register
 dreg equ    219 ; data register
 
 ; string given in hl
-; line number given in a
-; clears line a, then writes string hl to the line
-; Maximum length 20 characters is enforced
-;lcd_write_line:
-;    call lcd_clear_line
-;    call lcd_goto_line    
-;    ld c, 20
-;lcd_write_line_loop:
-;    ld a, (hl)
-;    or a
-;    jr z, lcd_write_line_done
-;    
-;    ld b, a
-;    call lcd_wrd
-;    inc hl
-;
-;    dec c
-;    jr z, lcd_write_line_done
-;    jr lcd_write_line_loop
-;lcd_write_line_done:
-;    ret
-
-; string given in hl
 ; to line a
 ; Writes at the position of the cursor
 lcd_write_string:

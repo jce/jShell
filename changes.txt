@@ -1,3 +1,6 @@
+0.2.9
+- new dump command, dumpint 0x0000 to 0xF000
+- new dump.py, that issues dump and creates dump.hex. Can be re-uploaded with sar.py
 0.2.8
 - Stack frame experiment(s)
 - LCD now also shows start address.

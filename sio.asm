@@ -19,6 +19,7 @@ sio_newline:
 sio_prstr:
     push af
     push bc
+    push de
     push hl
 sio_prstr_begin:
     ld a, (hl)
@@ -30,6 +31,7 @@ sio_prstr_begin:
     jr sio_prstr_begin
 sio_prstr_end:
     pop hl
+    pop de
     pop bc
     pop af
     ret
@@ -113,8 +115,10 @@ SIO_A_RESET:
     ret
 
 sio_isr:
-    ex af, af'
-    exx
+    push af
+    push bc
+    push de
+    push hl
     push ix
     push iy
     call jshell
@@ -124,8 +128,10 @@ sio_isr:
     ei
     pop iy
     pop ix
-    exx
-    ex af, af'
+    pop hl
+    pop de
+    pop bc
+    pop af
     reti
 sio_isr_disable:
     ;di
