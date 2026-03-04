@@ -1,3 +1,7 @@
+0.3.0
+- SIO interrupts handled, SIO configured for 100 Hz interrupts
+- Clock on LCD updates every second (instead of counter multiple)
+- uptime command displays uptime in hexadecimal
 0.2.9
 - new dump command, dumpint 0x0000 to 0xF000
 - new dump.py, that issues dump and creates dump.hex. Can be re-uploaded with sar.py

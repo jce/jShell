@@ -125,13 +125,13 @@ sio_isr:
     ld a, (run_enabled)
     or a
     jr z, sio_isr_disable
-    ei
     pop iy
     pop ix
     pop hl
     pop de
     pop bc
     pop af
+    ei
     reti
 sio_isr_disable:
     ;di

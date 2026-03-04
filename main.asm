@@ -5,6 +5,14 @@ int_offs .equ 0x0
     jr proginit ; at 0x8000
 
 .dw sio_isr     ; at 0x8002
+    nop
+    nop
+    nop
+    nop
+.dw ctc_isr0    ; at 0x8008
+.dw ctc_isr1    ; at 0x800A
+.dw ctc_isr2    ; at 0x800C
+.dw ctc_isr3    ; at 0x800E
 
 proginit:
     ld sp, 0x0
@@ -12,6 +20,7 @@ proginit:
     call ds1302_init
     call log_startup       ; needs to be after the clock init
     call SIO_A_RESET
+    call ctc_init
 
     ld b, 13
     call sio_prchr
@@ -70,21 +79,18 @@ mainloop:
     ret
 
 main_clock:
-    ld a, (main_clock_ctr)
-    dec a
+    ld a, (ctc_s_flag)    
     or a
-    ld b, a
-    jr nz, main_clock_pass
-    ld b, 0xff
+    jr z, main_clock_pass
+
+    ld a, 0
+    ld (ctc_s_flag), a
     call ctime
     ld a, 1
     call lcd_goto_line
     call lcd_write_string
 main_clock_pass:
-    ld a, b
-    ld (main_clock_ctr), a
     ret
-main_clock_ctr: .db 1
 
 main_pwm:
     ld a, (pwm_enabled)
@@ -129,5 +135,6 @@ run_enabled: .db 1
 #include "log.asm"
 #include "memview.asm"
 #include "dump.asm"
+#include "ctc.asm"
 
 .END

@@ -1,7 +1,7 @@
 jshellname:
     .db 'jShell', 0
 jshellver:
-    .db '0.2.9', 0
+    .db '0.3.0', 0
 jshellprompt:
     .db ">", 0
 
@@ -27,6 +27,7 @@ clog:  .db "log", 0
 csf1:  .db "sf", 0
 csf2:  .db "stackframe", 0
 cdump: .db "dump", 0
+cuptime:.db"uptime", 0
 commands:
     .dw c_,     help
     .dw cls,    help
@@ -50,6 +51,7 @@ commands:
     .dw csf1,   stackframe
     .dw csf2,   stackframe
     .dw cdump,  dump
+    .dw cuptime,ctc_uptime
     .db 0, 0
 
 error:
@@ -83,6 +85,7 @@ help:
     ld hl, helpi        \ call sio_prstr_nl
     ld hl, helpj        \ call sio_prstr_nl
     ld hl, helpk        \ call sio_prstr_nl
+    ld hl, helpl        \ call sio_prstr_nl
     ret
 help0: .db "Help function.", 0
 help1: .db " ", 0
@@ -105,6 +108,7 @@ helph: .db "log [arguments] - No arguments: Show log file. Arguments: Add to log
 helpi: .db "log init [location 0-FFFF] [size 0-FFFF] - Initialize the logfile.", 0
 helpj: .db "stackframe, sf - Experiment with stackframe technique(s).", 0
 helpk: .db "dump - Dump 0x000 to 0xF000 as intel hex.", 0
+helpl: .db "uptime - Display uptime.", 0
 
 ; A command gets argc in e and argv in hl
 
