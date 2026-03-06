@@ -1,6 +1,6 @@
-.ORG $000
+.ORG $8000
 init:
-int_offs .equ 0x0
+int_offs .equ 0x80
 
     jr proginit ; at 0x8000
 
@@ -121,6 +121,7 @@ main_disablepwm:
 pwm_enabled: .db 1
 run_enabled: .db 1
 
+#include "macro.asm"
 #include "stackframe.asm"
 #include "math.asm"
 #include "pwm.asm"
@@ -136,5 +137,6 @@ run_enabled: .db 1
 #include "memview.asm"
 #include "dump.asm"
 #include "ctc.asm"
+#include "uint32tostr.asm"
 
 .END
