@@ -83,6 +83,7 @@ ds1302_burstwriteclock:
     push bc
     push de
     push hl
+    di
 ; a - scratchpad, function parameter
 ; b - iterator counter
 ; c - scratchpad
@@ -120,6 +121,7 @@ ds1302_burstwriteclock_loop:
     call ds1302_CE_disable
     call ds1302_clock_low
     
+    ei
     pop hl
     pop de
     pop bc
@@ -131,6 +133,7 @@ ds1302_burstreadclock:
     push bc
     push de
     push hl
+    di
 ; a - scratchpad, function parameter
 ; b - iterator counter
 ; c - scratchpad
@@ -150,6 +153,7 @@ ds1302_burstreadclock_readloop:
 	inc hl
 	djnz ds1302_burstreadclock_readloop
     call ds1302_CE_disable
+    ei
     pop hl
     pop de
     pop bc
@@ -165,10 +169,12 @@ ds1302_burstreadclock_readloop:
 ds1302_txrx:
     push bc
     push hl
+    di
     ld e, 0
 	call ds1302_tx
 	call ds1302_rx
     call ds1302_CE_disable
+    ei
     pop hl
     pop bc
     ret

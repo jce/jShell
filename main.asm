@@ -1,6 +1,6 @@
-.ORG $8000
+.ORG $000
 init:
-int_offs .equ 0x80
+int_offs .equ 0x0
 
     jr proginit ; at 0x8000
 
@@ -16,6 +16,11 @@ int_offs .equ 0x80
 
 proginit:
     ld sp, 0x0
+    ; Init interrupts, offset at 0x80
+    ld a, int_offs
+    ld i, a
+    IM 2
+    ei
     call lcd_init
     call ds1302_init
     call log_startup       ; needs to be after the clock init
@@ -58,11 +63,6 @@ proginit:
     ld hl, jshellprompt
     call sio_prstr
 
-    ; Init interrupts, offset at 0x80
-    ld a, int_offs
-    ld i, a
-    IM 2
-    ei
 
     ld a, 1
     ld (run_enabled), a

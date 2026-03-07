@@ -122,9 +122,6 @@ sio_isr:
     push ix
     push iy
     call jshell
-    ld a, (run_enabled)
-    or a
-    jr z, sio_isr_disable
     pop iy
     pop ix
     pop hl
@@ -132,9 +129,6 @@ sio_isr:
     pop bc
     pop af
     ei
-    reti
-sio_isr_disable:
-    ;di
     reti
 
 ; Print hexadecimal uint16_t and newline
