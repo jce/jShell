@@ -1,3 +1,6 @@
+0.3.2
+- di, ei, reset, go command work.
+- Macro's moved to the start.
 0.3.1
 - Uptime readout is now in decimal seconds.
 - Clock readout is no longer damaged by interrupts.

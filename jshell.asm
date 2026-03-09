@@ -1,7 +1,7 @@
 jshellname:
     .db 'jShell', 0
 jshellver:
-    .db '0.3.1', 0
+    .db '0.3.2', 0
 jshellprompt:
     .db ">", 0
 
@@ -28,8 +28,10 @@ csf1:  .db "sf", 0
 csf2:  .db "stackframe", 0
 cdump: .db "dump", 0
 cuptime:.db"uptime", 0
-cdi:.db"di", 0
-cei:.db"ei", 0
+cdi:   .db"di", 0
+cei:   .db"ei", 0
+cgo:   .db"go", 0
+creset:.db"reset", 0
 commands:
     .dw c_,     help
     .dw cls,    help
@@ -56,6 +58,8 @@ commands:
     .dw cuptime,ctc_uptime
     .dw cdi,    fdi
     .dw cei,    fei
+    .dw cgo,    fgo
+    .dw creset, freset
     .db 0, 0
 
 error:
@@ -91,6 +95,8 @@ help:
     ld hl, helpk        \ call sio_prstr_nl
     ld hl, helpl        \ call sio_prstr_nl
     ld hl, helpm        \ call sio_prstr_nl
+    ld hl, helpn        \ call sio_prstr_nl
+    ld hl, helpo        \ call sio_prstr_nl
     ret
 help0: .db "Help function.", 0
 help1: .db " ", 0
@@ -98,12 +104,12 @@ help2: .db "help, ls, ? - Display this help.", 0
 help3: .db "test - Run the test function.", 0
 help4: .db "error - Simple error notification.", 0
 help5: .db "lcd [0-3] <text> - Write to LCD screen.", 0
-help6: .db "in [0-ff] - Read input register.", 0
-help7: .db "out [0-ff] [0-ff] - Write output register.", 0
-help8: .db "fill [0-ffff] [0-ffff] [0-ff] - Fill memory from to with value.", 0
-help9: .db "read [0-ffff] [0-ffff] - Read memory from len.", 0
+help6: .db "in [0-FF] - Read input register.", 0
+help7: .db "out [0-FF] [0-FF] - Write output register.", 0
+help8: .db "fill [0-FFFF] [0-FFFF] [0-FF] - Fill memory from to with value.", 0
+help9: .db "read [0-FFFF] [0-FFFF] - Read memory from len.", 0
 ;helpa: .db "write [0-ffff] [0-ff]: Write, location, value.", 0
-helpb: .db "copy [0-ffff] [0-ffff] [0-ffff] - Copies from, to for length.", 0
+helpb: .db "copy [0-FFFF] [0-FFFF] [0-FFFF] - Copies from, to for length.", 0
 helpc: .db "pwm [on/off] turns the blinking animation on out0 on or off.", 0
 helpd: .db "ret - Returns from jshell (exit).", 0
 helpe: .db "hl, hexload - starts the hexloader.", 0
@@ -115,17 +121,40 @@ helpj: .db "stackframe, sf - Experiment with stackframe technique(s).", 0
 helpk: .db "dump - Dump 0x000 to 0xF000 as intel hex.", 0
 helpl: .db "uptime - Display uptime [s].", 0
 helpm: .db "di, ei - Disable interrupts, enable interrupts.", 0
+helpn: .db "go [0-FFFF] - run function at location.", 0
+helpo: .db "reset - Soft reset of processor.", 0
 
 ; A command gets argc in e and argv in hl
 
+;llllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll
+fgo:
+    ld a, 4
+    ld (main_cmd), a
+    inc hl \ inc hl ; Increment to first argument
+    ld de, (hl)     ; Read the string pointer from argv.
+    ld hl, de       ;  
+    call hstoui16   ; Reads string from hl, outputs to de.
+    ld (main_goto), de
+    
+    ld hl, lcd_ok_text
+    call sio_prstr_nl
+    ret
+freset:
+    ld a, 5
+    ld (main_cmd), a
+    ld hl, lcd_ok_text
+    call sio_prstr_nl
+    ret
 ;kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk
 fdi:
-    di
+    ld a, 2
+    ld (main_cmd), a
     ld hl, lcd_ok_text
     call sio_prstr_nl
     ret
 fei:
-    ei
+    ld a, 3
+    ld (main_cmd), a
     ld hl, lcd_ok_text
     call sio_prstr_nl
     ret

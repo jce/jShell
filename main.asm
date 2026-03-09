@@ -1,6 +1,7 @@
-.ORG $000
+#include "macro.asm"
+.ORG $8000
 init:
-int_offs .equ 0x0
+int_offs .equ 0x80
 
     jr proginit ; at 0x8000
 
@@ -13,6 +14,7 @@ int_offs .equ 0x0
 .dw ctc_isr1    ; at 0x800A
 .dw ctc_isr2    ; at 0x800C
 .dw ctc_isr3    ; at 0x800E
+
 
 proginit:
     ld sp, 0x0
@@ -41,12 +43,10 @@ proginit:
     ld b, ' '
     call lcd_wrd
 
-    ld hl, ctime_buf        ; Hack, who needs a clock buffer now?
+    ld hl, main_locbuf
     ld de, init
     call ui16tohs
-    ld a, 0
-    ld (ctime_buf + 4), a
-    ld hl, ctime_buf
+    ld hl, main_locbuf
     call lcd_write_string
 
     ld hl, jshellname
@@ -63,7 +63,6 @@ proginit:
     ld hl, jshellprompt
     call sio_prstr
 
-
     ld a, 1
     ld (run_enabled), a
 
@@ -72,6 +71,7 @@ mainloop:
     call main_pwm
     ;call jshell
     call main_clock
+    call main_command
 
     ld a, (run_enabled)
     or a
@@ -118,11 +118,45 @@ main_disablepwm:
     call zero_pwm_data  
     ret
 
-pwm_enabled: .db 1
-run_enabled: .db 1
+main_command:
+    ld a, (main_cmd)
+    cp 1    ; ret
+    jr nz, main_command_2
+    xor a
+    ld (run_enabled), a
+main_command_2:
+    cp 2
+    jr nz, main_command_3
+    di
+main_command_3:
+    cp 3
+    jr nz, main_command_4
+    ei
+main_command_4:
+    cp 4
+    jr nz, main_command_5
+    ld hl, (main_goto)
+    push hl
+    xor a
+    ld (main_cmd), a
+    ret
+main_command_5:
+    cp 5
+    jr nz, main_command_6
+    xor a
+    ld (main_cmd), a
+    rst 0
+main_command_6:
+    xor a
+    ld (main_cmd), a
+    ret
 
-#include "macro.asm"
-#include "stackframe.asm"
+pwm_enabled:    .db 1
+run_enabled:    .db 1
+main_cmd:       .db 0
+main_goto:      .dw 0
+main_locbuf:    .db 0,0,0,0,0
+
 #include "math.asm"
 #include "pwm.asm"
 #include "sio.asm"
@@ -138,5 +172,6 @@ run_enabled: .db 1
 #include "dump.asm"
 #include "ctc.asm"
 #include "uint32tostr.asm"
+#include "stackframe.asm"
 
 .END
