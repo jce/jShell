@@ -1,3 +1,5 @@
+0.3.3
+- Trap function added
 0.3.2
 - di, ei, reset, go command work.
 - Macro's moved to the start.

@@ -1,7 +1,7 @@
 #include "macro.asm"
-.ORG $8000
+.ORG $000
 init:
-int_offs .equ 0x80
+int_offs .equ 0x0
 
     jr proginit ; at 0x8000
 
@@ -28,6 +28,7 @@ proginit:
     call log_startup       ; needs to be after the clock init
     call SIO_A_RESET
     call ctc_init
+    call trap_init          ; Needs to be after SIO_A
 
     ld b, 13
     call sio_prchr
@@ -173,5 +174,6 @@ main_locbuf:    .db 0,0,0,0,0
 #include "ctc.asm"
 #include "uint32tostr.asm"
 #include "stackframe.asm"
-
+#include "trap.asm"
+end:
 .END

@@ -1,7 +1,7 @@
 jshellname:
     .db 'jShell', 0
 jshellver:
-    .db '0.3.2', 0
+    .db '0.3.3', 0
 jshellprompt:
     .db ">", 0
 
@@ -32,6 +32,7 @@ cdi:   .db"di", 0
 cei:   .db"ei", 0
 cgo:   .db"go", 0
 creset:.db"reset", 0
+ctrap:.db"trap", 0
 commands:
     .dw c_,     help
     .dw cls,    help
@@ -60,6 +61,7 @@ commands:
     .dw cei,    fei
     .dw cgo,    fgo
     .dw creset, freset
+    .dw ctrap,  trap
     .db 0, 0
 
 error:
@@ -97,6 +99,7 @@ help:
     ld hl, helpm        \ call sio_prstr_nl
     ld hl, helpn        \ call sio_prstr_nl
     ld hl, helpo        \ call sio_prstr_nl
+    ld hl, helpp        \ call sio_prstr_nl
     ret
 help0: .db "Help function.", 0
 help1: .db " ", 0
@@ -123,6 +126,7 @@ helpl: .db "uptime - Display uptime [s].", 0
 helpm: .db "di, ei - Disable interrupts, enable interrupts.", 0
 helpn: .db "go [0-FFFF] - run function at location.", 0
 helpo: .db "reset - Soft reset of processor.", 0
+helpp: .db "trap - Trigger the trap function.", 0
 
 ; A command gets argc in e and argv in hl
 

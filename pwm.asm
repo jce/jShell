@@ -42,20 +42,19 @@ pwm_item_to_value:
     ld a, b
     and a
     ld ix, pwmdata
-pwm_item_to_value_loop_return:
-    jr nz, pwm_item_to_value_loop
+pwm_item_next_index:
+    jr z, pwm_item_found_index
+    inc ix
+    dec a
+    jr pwm_item_next_index    
 
+pwm_item_found_index:
     ld a, (ix)
     add c
     ld (ix), a
     pop bc
     pop ix
     ret
-
-pwm_item_to_value_loop:
-    inc ix
-    dec a
-    jr pwm_item_to_value_loop_return
 
 ; ============ zero all pwm data =====================
 zero_pwm_data:
