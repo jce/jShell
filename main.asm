@@ -1,8 +1,7 @@
 #include "macro.asm"
-.ORG $000
-init:
-int_offs .equ 0x0
+#include "conf.asm"
 
+init:
     jr proginit ; at 0x8000
 
 .dw sio_isr     ; at 0x8002
@@ -14,7 +13,6 @@ int_offs .equ 0x0
 .dw ctc_isr1    ; at 0x800A
 .dw ctc_isr2    ; at 0x800C
 .dw ctc_isr3    ; at 0x800E
-
 
 proginit:
     ld sp, 0x0
@@ -73,6 +71,9 @@ mainloop:
     ;call jshell
     call main_clock
     call main_command
+    ;call main_pwm
+    ;nop \ nop \ nop \ nop
+    
 
     ld a, (run_enabled)
     or a
@@ -94,8 +95,11 @@ main_clock_pass:
     ret
 
 main_pwm:
+    ld a, 0x00
+    out (0), a
     ld a, (pwm_enabled)
     or a
+strange:
     jr z, pwm_enable_pass
     call zero_pwm_data  
     ld a, c
