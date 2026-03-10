@@ -49,9 +49,9 @@ trap_init:
     ld bc, init
     call trap_init_block
     ld hl, end
-    ld bc, 0xa000
+    ld bc, log_location_c
     call trap_init_block
-    ld hl, 0xc000
+    ld hl, log_location_c+log_len_c
     ld bc, 0xf000
     call trap_init_block
     ld hl, 0xf000

@@ -1,7 +1,7 @@
 jshellname:
     .db 'jShell', 0
 jshellver:
-    .db '0.3.3', 0
+    .db '0.3.4', 0
 jshellprompt:
     .db ">", 0
 
@@ -122,7 +122,7 @@ helpe: .db "hl, hexload - starts the hexloader.", 0
 helpf: .db "sp - print the current stack pointer value.", 0
 helpg: .db "clock - No parameters: Tell date and time. 6 parameters: Configure date and time: day month year hour minute second.", 0
 helph: .db "log [arguments] - No arguments: Show log file. Arguments: Add to log file.", 0
-helpi: .db "log init [location 0-FFFF] [size 0-FFFF] - Initialize the logfile.", 0
+helpi: .db "log init - Initialize the logfile.", 0
 helpj: .db "stackframe, sf - Experiment with stackframe technique(s).", 0
 helpk: .db "dump - Dump 0x000 to 0xF000 as intel hex.", 0
 helpl: .db "uptime - Display uptime [s].", 0
@@ -182,7 +182,7 @@ log:
 
 log_with_arguments:
     ld a, e         ; Hunt for "log init aaaa bbbb"
-    cp 4            ; 4 words? 
+    cp 2            ; 2 words? 
     jr nz, log_not_init ; No? not log init.
     push hl         ; Remember hl
     push de         ; Remember de
@@ -196,26 +196,9 @@ log_with_arguments:
     pop hl
     jr nz, log_not_init ; No? Not log init.
                     ; Okay, we are satisfied that it is "log init"
-    inc hl          ; Increment to second parameter.
-    inc hl          ; 
-    inc hl          ; 
-    inc hl          ; 
-    push hl         ;
-    ld bc, (hl)     ; Read the string pointer from
-    ld hl, bc       ;   argv.
-    call hstoui16   ; Reads uint16 from hl, outputs to de.
-    ld bc, de       ; Remember the result in bc
-    pop hl
-
-    inc hl          ; Increment to third parameter.
-    inc hl          ; 
-    ld de, (hl)     ; Read the string pointer from
-    ld hl, de       ;   argv.
-    call hstoui16   ; Reads uint16 from hl, outputs to de.
-    ld hl, bc       ; Remember bc
-
     call log_init
-
+    ld hl, lcd_ok_text
+    call sio_prstr_nl
     ret
 
 log_not_init:
@@ -227,6 +210,8 @@ log_not_init:
     ld de, (hl)
     ld hl, de
     call log_add
+    ld hl, lcd_ok_text
+    call sio_prstr_nl
     ret
 
 ; function that merges arguments 0-n, changing intermediate

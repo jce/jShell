@@ -1,5 +1,18 @@
-; Run in the init section
+; Run this in the init section, not log_init
 log_startup:
+    ld hl, (log_location_c) ; Test if log is sane
+    ld bc, log_location_c
+    or a
+    sbc hl, bc              ; Test if write pointer is larger than log location
+    jr c, log_startup_init 
+    ld de, log_len_c
+    sbc hl, de              ; Test if write pointer - log location is smaller than log length
+    jr c, log_startup_init_pass 
+
+log_startup_init:                    
+    call log_init           ; Not sane, init log
+log_startup_init_pass:
+
     ; Create a shutdown record
     ld hl, ctime_buf        ; Dirty hack to get the shutdown time approximately
     call log_add_str    
@@ -47,29 +60,20 @@ log_startup_str: .db "Startup ",0
     
 ; Call from jshell, show log file
 log_show:
-    push hl
     ld hl, show_log_string
     call sio_prstr
-    ld hl, (log_location)
+    ld hl, log_location_c
     call sio_uint16_hex     ; Show log configuration in one line
     ld hl, show_log_string2
     call sio_prstr
-
-    ld bc, (log_location)
-    ld ix, (log_location)
-    ld hl, (ix+0)
-    or 0                    ; Clear C flag
-    sbc hl, bc
-    inc hl                  
+    ld hl, log_len_c                  
     call sio_uint16_hex_nl
-    pop hl
 
-    ld hl, (ix+2)           ; Look for the write pointer
+    ld hl, (log_location_c) ; Look for the write pointer
     inc hl                  ; Increment one, for the write pointer points at a 0 byte
     call sio_prstr          ; Show that string (second half)
-    ld hl, (log_location)   ; Back to the beginning
-    ld bc, 4
-    add hl, bc
+    ld hl, log_location_c   ; Back to the beginning
+    inc hl \ inc hl
     call sio_prstr          ; Show this string as well (first half)
     ret
 show_log_string: .db "Log at: ",0
@@ -89,8 +93,6 @@ log_add:
     call log_addch
     ld a, 10
     call log_addch
-    ld hl, lcd_ok_text
-    call sio_prstr_nl
     ret
 
 ; Adds string to log
@@ -109,18 +111,9 @@ log_add_str:
 ; Add a single character to the log
 ; a - input character
 log_addch:
-;    ld d, a
-;    ld ix, (log_location)   ; leave if write pointer is 0xffff
-;    ld bc, (ix+2)           ; which is never the case for RAM uninitialised RAM :(
-;    ld a, b
-;    and c
-;    cp 0xff
-;    ret z
-;    ld a, d
 
-    ld ix, (log_location)
-    ld hl, (ix+2)           ; hl is the write pointer
-    ld bc, (ix+0)           ; bc is the end pointer
+    ld hl, (log_location_c) ; hl is the write pointer
+    ld bc, log_location_c + log_len_c - 1; bc is the end pointer. -1 for 2 null characters
     ld (hl), a              ; Put the character
     inc hl                  ; increment write pointer
 
@@ -131,16 +124,11 @@ log_addch:
     cp c
     jr nz, log_addch_end
 
-    ld hl, (log_location)   ; If equal, load the log location
-    inc hl                  ; And increment by four
-    inc hl
-    inc hl
-    inc hl
-    ld (ix+2), hl           ; Store write pointer
-    jr log_addch_end
+    ld hl, log_location_c   ; If equal, load the log location
+    inc hl \ inc hl         ; And increment by two
 
 log_addch_end:
-    ld (ix+2), hl           ; Store write pointer
+    ld (log_location_c), hl ; Store write pointer
     ld (hl), 0              ; Put a null to terminate the first half
     ret
 
@@ -148,10 +136,8 @@ log_addch_end:
 ; hl - location
 ; de - size
 log_init:
-    ld (log_location), hl   ; Store the location in application memory
-    add hl, de              ; hl contains end location
-    ld de, hl               ; de changes from size to end location
-    ld hl, (log_location)   ; Start from the beginning
+    ld hl, log_location_c
+    ld de, log_location_c + log_len_c
                             ; hl is write pointer, de is end pointer
 log_init_continue:          ; Fill the whole block with zeroes
     ld (hl), 0              ;
@@ -163,18 +149,9 @@ log_init_continue:          ; Fill the whole block with zeroes
     cp e
     jr nz, log_init_continue
 
-    ld hl, (log_location)   ; Back to the beginning
-    dec de
-    ld (hl), de             ; Store end location
-    inc hl
-    inc hl
-    ld de, hl
-    inc de
-    inc de
-    ld (hl), de             ; Store write pointer: 4 past beginning
+    ld de, log_location_c   ; 
+    inc de \ inc de         ; Write pointer: start 2 positions after beginning
+    ld (log_location_c), de ; Store write pointer
 
-    ld hl, lcd_ok_text
-    call sio_prstr_nl
     ret
 
-log_location: .dw 0xA000
