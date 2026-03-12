@@ -27,12 +27,13 @@ proginit:
     call SIO_A_RESET
     call ctc_init
     call trap_init          ; Needs to be after SIO_A
+    call jshell_init
 
     ld b, 13
     call sio_prchr
     ld b, 10
     call sio_prchr
-
+strange:
     ld hl, jshellname
     call lcd_write_string
     ld b, ' '
@@ -71,10 +72,7 @@ mainloop:
     ;call jshell
     call main_clock
     call main_command
-    ;call main_pwm
-    ;nop \ nop \ nop \ nop
     
-
     ld a, (run_enabled)
     or a
     jr nz, mainloop
@@ -99,7 +97,6 @@ main_pwm:
     out (0), a
     ld a, (pwm_enabled)
     or a
-strange:
     jr z, pwm_enable_pass
     call zero_pwm_data  
     ld a, c
@@ -179,5 +176,6 @@ main_locbuf:    .db 0,0,0,0,0
 #include "uint32tostr.asm"
 #include "stackframe.asm"
 #include "trap.asm"
+#include "ramtest.asm"
 end:
 .END

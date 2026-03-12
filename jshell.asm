@@ -1,7 +1,7 @@
 jshellname:
     .db 'jShell', 0
 jshellver:
-    .db '0.3.4', 0
+    .db '0.3.5', 0
 jshellprompt:
     .db ">", 0
 
@@ -34,6 +34,7 @@ cgo:   .db"go", 0
 creset:.db"reset", 0
 ctrap:.db"trap", 0
 cstrange:.db"strange", 0
+crtest:.db"ramtest", 0
 commands:
     .dw c_,     help
     .dw cls,    help
@@ -64,6 +65,7 @@ commands:
     .dw creset, freset
     .dw ctrap,  trap
     .dw cstrange,fstrange
+    .dw crtest, ramtest
     .db 0, 0
 
 error:
@@ -103,6 +105,7 @@ help:
     ld hl, helpo        \ call sio_prstr_nl
     ld hl, helpp        \ call sio_prstr_nl
     ld hl, helpq        \ call sio_prstr_nl
+    ld hl, helpv        \ call sio_prstr_nl
     ret
 help0: .db "Help function.", 0
 help1: .db " ", 0
@@ -118,7 +121,7 @@ help9: .db "read [0-FFFF] [0-FFFF] - Read memory from len.", 0
 helpb: .db "copy [0-FFFF] [0-FFFF] [0-FFFF] - Copies from, to for length.", 0
 helpc: .db "pwm [on/off] turns the blinking animation on out0 on or off.", 0
 helpd: .db "ret - Returns from jshell (exit).", 0
-helpe: .db "hl, hexload - starts the hexloader.", 0
+helpe: .db "hl, hexload - starts the hexloader. Overwrites stack.", 0
 helpf: .db "sp - print the current stack pointer value.", 0
 helpg: .db "clock - No parameters: Tell date and time. 6 parameters: Configure date and time: day month year hour minute second.", 0
 helph: .db "log [arguments] - No arguments: Show log file. Arguments: Add to log file.", 0
@@ -131,6 +134,7 @@ helpn: .db "go [0-FFFF] - run function at location.", 0
 helpo: .db "reset - Soft reset of processor.", 0
 helpp: .db "trap - Trigger the trap function.", 0
 helpq: .db "strange - where is the strange label?", 0
+helpv: .db "ramtest - Do the ramtest. Overwrites stack.", 0
 
 ; A command gets argc in e and argv in hl
 
@@ -968,6 +972,14 @@ replacecharacters:
 replacecharacters_pass:
     inc hl
     jp replacecharacters
+
+;=====================================================================================
+jshell_init:
+    ld hl, buf
+    ld (bufw), hl
+    ld a, 0
+    ld (buflen), a
+    ret
 
 buf:
     .block 201

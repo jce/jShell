@@ -1,3 +1,9 @@
+0.3.5
+- ramtest function. Writes and reads back all ram locations multiple times. Stops upon a failure.
+- jShell now resets with a empty command line. (bugfix)
+0.3.4
+- Log is now predefined at 0xa000 length 0x2000. Log init will just init that. When log write pointer is
+not credible on startup: Automatic init. Trap prepares all unclaimed memory as trap.
 0.3.3
 - Trap function added
 0.3.2
