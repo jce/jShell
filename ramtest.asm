@@ -9,8 +9,6 @@ ramtest
     ld hl, rtwarning
     call sio_prstr_nl
     ld ix, 0x10000 - (rtend - rtbegin)
-    ;ld ixh, 0xff
-    ;ld ixl, 256 - (rtend - rtbegin)
     ld hl, 0x0000   ; Pointer where to start testing
     di
     jr rtloadandrun
@@ -55,41 +53,43 @@ rtbegin:
 
 rtcontinue:
 
-    ld b, 0x80
+    ld b, 0xff
     ld e, (hl)
 
 rtcontinue2:
-    ld (hl), 0xF0
+    ld (hl), b
     ld a, (hl)
-    cp 0xF0
+    cp b
     jr nz, rtfail
 
-    ld (hl), 0x0F
+    ld (hl), b
     ld a, (hl)
-    cp 0x0F
+    cp b
+    jr z, rtsucces
+    jr rtfail
+rtsucces:
+
+    ld (hl), b
+    ld a, (hl)
+    cp b
     jr nz, rtfail
+
+    ld (hl), b
+    ld a, (hl)
+    cp b
+    jr nz, rtfail
+
+    ld (hl), b
+    ld a, (hl)
+    cp b
+    jr nz, rtfail
+
+    djnz rtcontinue2    
 
     ld (hl), 0x00
     ld a, (hl)
     cp 0x00
     jr nz, rtfail
-
-    ld (hl), 0xFF
-    ld a, (hl)
-    cp 0xFF
-    jr nz, rtfail
-
-    ld (hl), 0b01010101
-    ld a, (hl)
-    cp 0b01010101
-    jr nz, rtfail
-
-    ld (hl), 0b10101010
-    ld a, (hl)
-    cp 0b10101010
-    jr nz, rtfail
-
-    djnz rtcontinue2    
 
     jr  rtpass
 rtfail:

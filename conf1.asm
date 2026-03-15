@@ -1,8 +1,8 @@
 .org 0x0000
-    jp 0x8000
+    jp 0x1000
 
-.ORG 0x8000
+.ORG 0x1000
 trap_start .equ         0x0003
-int_offs        .equ    0x80
+int_offs .equ           0x10
 log_location_c  .equ    0xA000
 log_len_c       .equ    0x2000

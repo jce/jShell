@@ -45,7 +45,7 @@ trapbuf: .block 64
 trap_init:
     ; There are two blocks we can trap. The first is from end of program, "end", to begin of log, 0xa000
     ; and end of log 0xc000 to begin of stack, SP - 400
-    ld hl, 0x0000
+    ld hl, trap_start
     ld bc, init
     call trap_init_block
     ld hl, end
