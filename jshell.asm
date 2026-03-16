@@ -1,7 +1,7 @@
 jshellname:
     .db 'jShell', 0
 jshellver:
-    .db '0.3.6', 0
+    .db '0.3.7', 0
 jshellprompt:
     .db ">", 0
 
@@ -737,7 +737,7 @@ lcd_toofew:
     ld hl, lcd_toofew_text
     call sio_prstr_nl
     ret
-lcd_ok_text:        .db "OK.",0
+lcd_ok_text:        .db "OK",0
 lcd_toofew_text:    .db "Too few arguments. Need at least 2 (line, text)",0
 lcd_notline_text:   .db "Too high line. Line should be [0-3].",0
 

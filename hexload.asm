@@ -68,15 +68,11 @@ hexload_pass_1b				;
 	jr hexload_start		; Jump back to hexload_start. Only even states have a complete byte and continue.
 
 hexload_pass_1_even_continue:
-
 	ld a, iyh				; Retrieve the high nibble from iyh
 	or b					; Even state, we continue. Or the previous and this nibble together
 	ld b, a					; Store result in b, b is now the full byte
 	add a, e				; Add the value to the zero sum crc
 	ld e, a					;
-	
-hexload_pass_1c
-
 	ld a, c					;
 	cp 3					; State is 3 or more
 	jr nc, hexload_pass_3	; Jump to hexload_pass_3
@@ -86,8 +82,6 @@ hexload_pass_1c
 	jr hexload_start		; Jump to hexload_start
 	
 hexload_pass_3:
-
-	ld a, c					;
 	cp 5					; State is 5 or more
 	jr nc, hexload_pass_5	; Continue to hexload_pass_5
 							; c = 4, first byte of address
@@ -96,8 +90,6 @@ hexload_pass_3:
 	jr hexload_start		; Jump to hexload_start
 
 hexload_pass_5:
-							
-	ld a, c					;
 	cp 7					; State is 7 or more
 	jr nc, hexload_pass_7	; Continue to hexload_pass_7
 							; c = 6, second byte address
@@ -109,14 +101,12 @@ hexload_start_2:			; Trampoline for jumping back
 	jr hexload_start		; to hexload_start
 	
 hexload_pass_7:
-
-	ld a, c					;
 	cp 9					; State is 9 or more
 	jr nc, hexload_pass_9	; Continue to hexload_pass_9
 							; c = 8, record type
-	ld a, b
+	ld a, b                 ; Load value in a
 	or b					; Test if record type is 00 (data)
-    jp nz, hexload_pass_7_end; if not, finished
+    jr nz, hexload_pass_7_end; if not, finished
 	inc c					; increment state
 	jr hexload_start_2		; Jump to hexload_start
 

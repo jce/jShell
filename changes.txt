@@ -1,3 +1,5 @@
+0.3.7
+- Bugfux in hexloader
 0.3.6
 - Added 0x1000 target
 - Improved ramtest
