@@ -1,3 +1,6 @@
+0.3.8
+- Animation with neopixels. Port A0
+- Moved log from A000 to B000
 0.3.7
 - Bugfux in hexloader
 0.3.6

@@ -28,6 +28,7 @@ proginit:
     call ctc_init
     call trap_init          ; Needs to be after SIO_A
     call jshell_init
+    call neo_init
 
     ld b, 13
     call sio_prchr
@@ -65,6 +66,7 @@ strange:
 
     ld a, 1
     ld (run_enabled), a
+    ld (neo_enabled), a
 
     ld c, 0
 mainloop:
@@ -72,7 +74,8 @@ mainloop:
     ;call jshell
     call main_clock
     call main_command
-    
+    call main_neo    
+
     ld a, (run_enabled)
     or a
     jr nz, mainloop
@@ -107,6 +110,43 @@ main_pwm:
     inc c
     inc c
 pwm_enable_pass:
+    ret
+
+main_neo:
+    ld a, (neo_enabled)
+    cp 0x01
+    jr z, main_neo_on
+    cp 0x02
+    jr z, main_neo_shutdown
+    ret
+
+main_neo_on:
+    ld a, (neo_step)
+    inc a
+    cp 120
+    jr nz, main_neo_continue
+    ld a, 0
+main_neo_continue:
+    ld (neo_step), a
+    push bc
+    call neo_cyclic
+    pop bc
+    ret
+
+main_neo_shutdown:
+    ld a, 0
+    ld (neo_enabled), a
+    call neo_off
+    ret
+
+main_enableneo:
+    ld a, 0x01
+    ld (neo_enabled), a
+    ret
+
+main_disableneo:
+    ld a, 0x02
+    ld (neo_enabled), a
     ret
 
 main_enablepwm:
@@ -153,7 +193,9 @@ main_command_6:
     ld (main_cmd), a
     ret
 
-pwm_enabled:    .db 1
+pwm_enabled:    .db 0
+neo_enabled:    .db 1
+neo_step:       .db 0
 run_enabled:    .db 1
 main_cmd:       .db 0
 main_goto:      .dw 0
@@ -177,5 +219,6 @@ main_locbuf:    .db 0,0,0,0,0
 #include "stackframe.asm"
 #include "trap.asm"
 #include "ramtest.asm"
+#include "neo.asm"
 end:
 .END

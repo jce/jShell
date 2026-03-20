@@ -1,40 +1,43 @@
 jshellname:
     .db 'jShell', 0
 jshellver:
-    .db '0.3.7', 0
+    .db '0.3.8', 0
 jshellprompt:
     .db ">", 0
 
-ctest: .db "test", 0
-c_:    .db "?", 0
-cls:   .db "ls", 0
-chelp: .db "help", 0
-cerror:.db "error", 0
-clcd:  .db "lcd", 0
-cin:   .db "in", 0
-cout:  .db "out", 0
-cfill: .db "fill", 0
-cread: .db "read", 0
+ctest:  .db "test", 0
+c_:     .db "?", 0
+cls:    .db "ls", 0
+chelp:  .db "help", 0
+cerror: .db "error", 0
+clcd:   .db "lcd", 0
+cin:    .db "in", 0
+cout:   .db "out", 0
+cfill:  .db "fill", 0
+cread:  .db "read", 0
+cread2:  .db "r", 0
 ;cwrite:.db "write", 0
-ccopy: .db "copy", 0
-cpwm:  .db "pwm", 0
-cret:  .db "ret", 0
-chl:   .db "hl", 0
+ccopy:  .db "copy", 0
+cpwm:   .db "pwm", 0
+cret:   .db "ret", 0
+chl:    .db "hl", 0
 chexload:.db "hexload", 0
-csp:   .db "sp", 0
-cclock:.db "clock", 0
-clog:  .db "log", 0
-csf1:  .db "sf", 0
-csf2:  .db "stackframe", 0
-cdump: .db "dump", 0
+csp:    .db "sp", 0
+cclock: .db "clock", 0
+clog:   .db "log", 0
+csf1:   .db "sf", 0
+csf2:   .db "stackframe", 0
+cdump:  .db "dump", 0
 cuptime:.db"uptime", 0
-cdi:   .db"di", 0
-cei:   .db"ei", 0
-cgo:   .db"go", 0
-creset:.db"reset", 0
-ctrap:.db"trap", 0
+cdi:    .db"di", 0
+cei:    .db"ei", 0
+cgo:    .db"go", 0
+creset: .db"reset", 0
+ctrap:  .db"trap", 0
 cstrange:.db"strange", 0
-crtest:.db"ramtest", 0
+crtest: .db"ramtest", 0
+cneo:   .db"neo", 0
+cneo2:   .db"n", 0
 commands:
     .dw c_,     help
     .dw cls,    help
@@ -46,6 +49,7 @@ commands:
     .dw cout,   out
     .dw cfill,  fill
     .dw cread,  read
+    .dw cread2,  read
 ;    .dw cwrite, write
     .dw ccopy,  copy
     .dw cpwm,   fpwm
@@ -66,6 +70,8 @@ commands:
     .dw ctrap,  trap
     .dw cstrange,fstrange
     .dw crtest, ramtest
+    .dw cneo,   fneo
+    .dw cneo2,  fneo
     .db 0, 0
 
 error:
@@ -106,6 +112,7 @@ help:
     ld hl, helpp        \ call sio_prstr_nl
     ld hl, helpq        \ call sio_prstr_nl
     ld hl, helpv        \ call sio_prstr_nl
+    ld hl, helpw        \ call sio_prstr_nl
     ret
 help0: .db "Help function.", 0
 help1: .db " ", 0
@@ -116,12 +123,12 @@ help5: .db "lcd [0-3] <text> - Write to LCD screen.", 0
 help6: .db "in [0-FF] - Read input register.", 0
 help7: .db "out [0-FF] [0-FF] - Write output register.", 0
 help8: .db "fill [0-FFFF] [0-FFFF] [0-FF] - Fill memory from to with value.", 0
-help9: .db "read [0-FFFF] [0-FFFF] - Read memory from len.", 0
+help9: .db "read, r [0-FFFF] [0-FFFF] - Read memory from len.", 0
 ;helpa: .db "write [0-ffff] [0-ff]: Write, location, value.", 0
 helpb: .db "copy [0-FFFF] [0-FFFF] [0-FFFF] - Copies from, to for length.", 0
 helpc: .db "pwm [on/off] turns the blinking animation on out0 on or off.", 0
 helpd: .db "ret - Returns from jshell (exit).", 0
-helpe: .db "hl, hexload - starts the hexloader. Overwrites stack.", 0
+helpe: .db "hexload, hl - starts the hexloader. Overwrites stack.", 0
 helpf: .db "sp - print the current stack pointer value.", 0
 helpg: .db "clock - No parameters: Tell date and time. 6 parameters: Configure date and time: day month year hour minute second.", 0
 helph: .db "log [arguments] - No arguments: Show log file. Arguments: Add to log file.", 0
@@ -135,6 +142,7 @@ helpo: .db "reset - Soft reset of processor.", 0
 helpp: .db "trap - Trigger the trap function.", 0
 helpq: .db "strange - where is the strange label?", 0
 helpv: .db "ramtest - Do the ramtest. Overwrites stack.", 0
+helpw: .db "neo, n [on/off] - Turn neopixel animation on or off.", 0
 
 ; A command gets argc in e and argv in hl
 
@@ -371,6 +379,32 @@ fret:
     ld a, 0
     ld (run_enabled), a
     ret
+; 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+fneo:
+    inc hl
+    inc hl
+    ld de, (hl)
+    ld hl, onstr
+    call strcmp
+    jr z, fneoonfound
+    ld hl, offstr
+    call strcmp
+    jr z, fneoofffound
+    ld hl, nonefound
+    call sio_prstr_nl
+    ret
+fneoonfound:
+    call main_enableneo
+    ld hl, lcd_ok_text
+    call sio_prstr_nl
+    ret
+
+fneoofffound:
+    call main_disableneo
+    ld hl, lcd_ok_text  
+    call sio_prstr_nl
+    ret
+
 
 ; \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 fpwm:
