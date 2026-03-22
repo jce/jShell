@@ -1,7 +1,7 @@
 jshellname:
     .db 'jShell', 0
 jshellver:
-    .db '0.3.9', 0
+    .db '0.3.10', 0
 jshellprompt:
     .db ">", 0
 
@@ -146,7 +146,7 @@ helpo: .db "reset - Soft reset of processor.", 0
 helpp: .db "trap - Trigger the trap function.", 0
 helpq: .db "strange - where is the strange label?", 0
 helpv: .db "ramtest - Do the ramtest. Overwrites stack.", 0
-helpw: .db "neo, n [on/off] - Turn neopixel animation on or off.", 0
+helpw: .db "neo, n [on/off, clock, tape, 0x00-0xFF] - Turn neopixel animation on or off, to clock or tape, intensity.", 0
 
 ; A command gets argc in e and argv in hl
 

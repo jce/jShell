@@ -2,52 +2,136 @@ neo_port:   .equ    0xA0    ; Port where the neopixel driver is located
 
 ; A command gets argc in e and argv in hl
 neo:
-    inc hl
-    inc hl
+    ld a, e
+    or a
+    cp 2
+    jr nz, neononefound
+    inc hl \ inc hl
     ld de, (hl)
-    ld hl, onstr
-    call strcmp
-    jr z, fneoonfound
-    ld hl, offstr
-    call strcmp
-    jr z, fneoofffound
+    ld hl, onstr    \ call strcmp \ jr z, neoonfound
+    ld hl, offstr   \ call strcmp \ jr z, neoofffound
+    ld hl, neo_clock\ call strcmp \ jr z, neoclockfound
+    ld hl, neo_tape \ call strcmp \ jr z, neotapefound
+    ld hl, de
+    call hstoui16
+    ld a, e
+    ld (neo_bright), a
+    jr neooktext
+neononefound:
     ld hl, nonefound
     call sio_prstr_nl
     ret
-fneoonfound:
-    call main_enableneo
-    ld hl, lcd_ok_text
-    call sio_prstr_nl
-    ret
-
-fneoofffound:
-    call main_disableneo
+neoonfound:
+    ld a, (neo_mode)
+    and a,  0b00111111
+    or a,   0b10000000
+    ld (neo_mode), a
+    jr neooktext
+neoofffound:
+    ld a, (neo_mode)
+    and a,  0b00111111
+    or a,   0b11000000
+    ld (neo_mode), a
+    jr neooktext
+neoclockfound:
+    ld a, (neo_mode)
+    and a,  0b11000000
+    or a,   neo_mode_clock
+    ld (neo_mode), a
+    jr neooktext
+neotapefound:
+    ld a, (neo_mode)
+    and a,  0b11000000
+    or a,   neo_mode_tape
+    ld (neo_mode), a
+    jr neooktext
+neooktext:
     ld hl, lcd_ok_text  
     call sio_prstr_nl
     ret
 
-
-; \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-
-
-; Function that turns the LEDs off
-neo_off:
-    call neo_clear_grb
-    call neo_grb_to_cmd
-    call neo_command_run
-    ret
+neo_mode:       .db     0x80 + neo_mode_tape
+neo_mode_clock: .equ    0x01
+neo_mode_tape:  .equ    0x02
+neo_tape_step:  .db     0x00
+neo_bright:     .db     10
+neo_clock:      .db     "clock",0
+neo_tape:       .db     "tape",0
 
 ; Function that gets cyclic called in the main loop
 neo_cyclic:
+    ld a, (neo_mode)
+    bit 7, a            \   ret z
     call neo_clear_grb
-    call neo_paint
+    bit 6, a            \   jr nz, neo_cyclic_off
+    and 0b00111111
+    cp  neo_mode_clock  \   jr z, neo_cyclic_clock
+    cp  neo_mode_tape   \   jr z, neo_cyclic_tape
+    jr neo_cyclic_end
+neo_cyclic_off:
+    and 0b00111111
+    ld (neo_mode), a
+    jr neo_cyclic_end
+neo_cyclic_clock:
+    call neo_paint_clock
+    jr neo_cyclic_end
+neo_cyclic_tape:
+    call neo_paint_tape
+    jr neo_cyclic_end
+neo_cyclic_end:
     call neo_grb_to_cmd
     call neo_command_run
     ret
 
 ; Paint function fills the grb buffer
-neo_paint:
-    ; Add painters here    
+;Draw a clock
+neo_paint_clock:
+    ld a, (neo_bright)
+    ld c, a
+    call mktime
+    ld a, (tm + 0)  \ ld b, 2 \ call neo_grb_pixel  ; Second hand 
+    ld a, (tm + 1)  \ ld b, 0 \ call neo_grb_pixel  ; Minute hand
+    ld a, (tm + 2) ; a is hours [0-23], scale to 60 [0-59]. Hours * 5 + minutes / 12
+    ld h, a
+    ld e, 5
+    call Mul8b      ; HL=H*E
+    ld e, l         ; e = Hours * 5
+    ld a, (tm + 1)
+    ld H, 0
+    ld l, a
+    ld d, 12
+    call Div8       ; HL=HL/D, l = Minutes / 12
+    ld a, l
+    add a, e
+    ld l, a
+    ld a, (neo_bright)
+    ld c, a
+    ld a, l         \ ld b, 1 \ call neo_grb_pixel  ; Hour hand
+
+    ; Draw dots for hours. Half the brightness for the 12 hour dot, another half the brightness
+    ; for the other hour dots.
+    ld a, c \ srl a \ ld c, a
+    ld a, 0 \ ld b, 0  \ call neo_grb_pixel \ ld b, 1 \ call neo_grb_pixel \ ld b, 2 \ call neo_grb_pixel
+    ld a, c \ srl a \ ld c, a
+    ld a, 0
+    ld d, 11
+neo_paint_clock_hour_dot:
+    add a, 5 \ ld b, 0 \ call neo_grb_pixel \ ld b, 1 \ call neo_grb_pixel \ ld b, 2 \ call neo_grb_pixel
+    dec d
+    jr nz, neo_paint_clock_hour_dot
+    ret
+
+; Paint function fills the grb buffer
+; Paints a tape recorder reel rotating
+neo_paint_tape:
+    ld a, (neo_tape_step)
+    inc a
+    cp 120
+    jr nz, neo_paint_tape_continue
+    ld a, 0
+neo_paint_tape_continue:
+    ld (neo_tape_step), a
+
     ; Reverse rotation direction
     ld b, a
     ld a, 120
@@ -55,21 +139,19 @@ neo_paint:
 
     ; a is displacement
     srl a \ rl b; \ srl a \ rl b ; The rightmost bit is decimal
-    ld c, 10     ; intensitiy green
-    ld h, 10     ; intensity red
-    ld l, 10     ; intensity blue
+    push af
+    ld a, (neo_bright)
+    ld c, a     ; intensitiy green
+    ld h, a     ; intensity red
+    ld l, a     ; intensity blue
     ld d, 8     ; line length
+    pop af
 
     call neo_grb_line_color
     add a, 20
     call neo_grb_line_color
     add a, 20
     call neo_grb_line_color
-
-    ;ld c, 40
-    ;ld a, 1
-    ;ld b, 2
-    ;call neo_grb_pixel
 
     ret
 

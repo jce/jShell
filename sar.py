@@ -27,7 +27,7 @@ def hexload(ser):
     bytes = bytearray("\r", encoding="utf-8")
     ser.write(bytes)
     print(bytes)
-    time.sleep(0.1)
+    time.sleep(0.3)
     bytes = bytearray("hexload\r", encoding="utf-8")
     ser.write(bytes)
     print(bytes)
