@@ -1,7 +1,7 @@
 jshellname:
     .db 'jShell', 0
 jshellver:
-    .db '0.3.8', 0
+    .db '0.3.9', 0
 jshellprompt:
     .db ">", 0
 
@@ -29,6 +29,7 @@ csf1:   .db "sf", 0
 csf2:   .db "stackframe", 0
 cdump:  .db "dump", 0
 cuptime:.db"uptime", 0
+cruntime:.db"runtime", 0
 cdi:    .db"di", 0
 cei:    .db"ei", 0
 cgo:    .db"go", 0
@@ -63,6 +64,7 @@ commands:
     .dw csf2,   stackframe
     .dw cdump,  dump
     .dw cuptime,ctc_uptime
+    .dw cruntime,ctc_runtime
     .dw cdi,    fdi
     .dw cei,    fei
     .dw cgo,    fgo
@@ -70,8 +72,8 @@ commands:
     .dw ctrap,  trap
     .dw cstrange,fstrange
     .dw crtest, ramtest
-    .dw cneo,   fneo
-    .dw cneo2,  fneo
+    .dw cneo,   neo
+    .dw cneo2,  neo
     .db 0, 0
 
 error:
@@ -106,6 +108,7 @@ help:
     ld hl, helpj        \ call sio_prstr_nl
     ld hl, helpk        \ call sio_prstr_nl
     ld hl, helpl        \ call sio_prstr_nl
+    ld hl, helpl2       \ call sio_prstr_nl
     ld hl, helpm        \ call sio_prstr_nl
     ld hl, helpn        \ call sio_prstr_nl
     ld hl, helpo        \ call sio_prstr_nl
@@ -136,6 +139,7 @@ helpi: .db "log init - Initialize the logfile.", 0
 helpj: .db "stackframe, sf - Experiment with stackframe technique(s).", 0
 helpk: .db "dump - Dump 0x000 to 0xF000 as intel hex.", 0
 helpl: .db "uptime - Display uptime [s].", 0
+helpl2:.db "runtime - Display cumulative runtime [s].", 0
 helpm: .db "di, ei - Disable interrupts, enable interrupts.", 0
 helpn: .db "go [0-FFFF] - run function at location.", 0
 helpo: .db "reset - Soft reset of processor.", 0
@@ -287,6 +291,13 @@ clock:
 clock_print_time:
     call ctime
     call sio_prstr_nl
+    ;call mktime ; Fill tm struct 
+    ;ld a, (tm+0)  \  call sio_uint8_nl
+    ;ld a, (tm+1)  \  call sio_uint8_nl
+    ;ld a, (tm+2)  \  call sio_uint8_nl
+    ;ld a, (tm+3)  \  call sio_uint8_nl
+    ;ld a, (tm+4)  \  call sio_uint8_nl
+    ;ld a, (tm+5)  \  call sio_uint8_nl
     ret
 
 clock_set_time:
@@ -380,33 +391,6 @@ fret:
     ld (run_enabled), a
     ret
 ; 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-fneo:
-    inc hl
-    inc hl
-    ld de, (hl)
-    ld hl, onstr
-    call strcmp
-    jr z, fneoonfound
-    ld hl, offstr
-    call strcmp
-    jr z, fneoofffound
-    ld hl, nonefound
-    call sio_prstr_nl
-    ret
-fneoonfound:
-    call main_enableneo
-    ld hl, lcd_ok_text
-    call sio_prstr_nl
-    ret
-
-fneoofffound:
-    call main_disableneo
-    ld hl, lcd_ok_text  
-    call sio_prstr_nl
-    ret
-
-
-; \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 fpwm:
     inc hl
     inc hl
@@ -702,6 +686,21 @@ test_argument:
     ld (hl), 0
     ld hl, testbuf
     call sio_prstr_nl
+
+    ld a, 0x25
+    call sio_uint8_hex
+    call bcdtoui8
+    call sio_uint8_hex_nl
+
+    ld de, 12345
+    call uint16tostr_buf
+    call sio_prstr_nl
+
+    ld hl, 54321
+    call sio_uint16_nl
+
+    ld a, 43
+    call sio_uint8_nl
 
     ret
 

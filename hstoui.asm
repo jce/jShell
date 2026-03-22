@@ -1,5 +1,25 @@
 ; File of conversion functions
 
+; Byte of BCD converted to uint8
+; a is input BCD value
+; a is output uint8 value
+bcdtoui8:
+    push bc
+    ld b, a
+    and 0x0F
+    ld c, a
+    ld a, b
+    srl a \ srl a \ srl a \ srl a
+    ld b, a
+    ld a, c
+    jr z, bcdtoui8_x2
+bcdtoui8_x1:
+    add a, 10
+    djnz bcdtoui8_x1
+bcdtoui8_x2:
+    pop bc
+    ret
+
 ; unsigned integer 4bits to hex string
 ; a - integer [0-15]
 ; hl - pointer to string where to write the character. Will be incremented once.

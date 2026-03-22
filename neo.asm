@@ -1,5 +1,35 @@
 neo_port:   .equ    0xA0    ; Port where the neopixel driver is located
 
+; A command gets argc in e and argv in hl
+neo:
+    inc hl
+    inc hl
+    ld de, (hl)
+    ld hl, onstr
+    call strcmp
+    jr z, fneoonfound
+    ld hl, offstr
+    call strcmp
+    jr z, fneoofffound
+    ld hl, nonefound
+    call sio_prstr_nl
+    ret
+fneoonfound:
+    call main_enableneo
+    ld hl, lcd_ok_text
+    call sio_prstr_nl
+    ret
+
+fneoofffound:
+    call main_disableneo
+    ld hl, lcd_ok_text  
+    call sio_prstr_nl
+    ret
+
+
+; \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+
+
 ; Function that turns the LEDs off
 neo_off:
     call neo_clear_grb

@@ -38,6 +38,8 @@ trap:
 
     ld hl, trapbuf
     call sio_prstr_nl
+traploop:
+    jr traploop
     ret
 
 trapbuf: .block 64

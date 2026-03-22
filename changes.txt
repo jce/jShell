@@ -1,3 +1,9 @@
+0.3.9
+- Added cumulative runtime counter
+- Uint8/16/32 to string functions added
+- BCD byte to uint8 translation added
+- Added mktime and tm structure
+- Trap is blocking
 0.3.8
 - Animation with neopixels. Port A0
 - Moved log from A000 to B000

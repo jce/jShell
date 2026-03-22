@@ -24,6 +24,10 @@ def run(offset, ser):
     print(bytes)
 
 def hexload(ser):
+    bytes = bytearray("\r", encoding="utf-8")
+    ser.write(bytes)
+    print(bytes)
+    time.sleep(0.1)
     bytes = bytearray("hexload\r", encoding="utf-8")
     ser.write(bytes)
     print(bytes)

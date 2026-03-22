@@ -151,6 +151,42 @@ sio_uint16_hex:
     pop af
     ret
 
+; Print uint16 as decimal integer and newline
+; hl - value to print
+sio_uint16_nl:
+    push hl
+    call sio_uint16
+    ld hl, sio_newline
+    call sio_prstr
+    pop hl
+    ret
+
+; Print uint16 as decimal integer
+; hl - value to print
+sio_uint16:
+    push hl
+    ld de, hl
+    call uint16tostr_buf
+    call sio_prstr
+    pop hl
+    ret
+
+sio_uint8:
+    push hl
+    ld h, 0
+    ld l, a
+    call sio_uint16
+    pop hl
+    ret
+
+sio_uint8_nl:
+    push hl
+    call sio_uint8
+    ld hl, sio_newline
+    call sio_prstr
+    pop hl
+    ret
+
 sio_uint8_hex_nl:
     push af
     push hl

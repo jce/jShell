@@ -2,6 +2,21 @@
 
 ds1302reg equ  0xc0
 
+
+; make tm struct based on clock readout
+; return: nothing. tm, the time struct, gets updated
+mktime:
+    push af
+    call ds1302_read
+    ld a, (ds1302_rv + 0) \ call bcdtoui8 \ ld (tm + 0), a
+    ld a, (ds1302_rv + 1) \ call bcdtoui8 \ ld (tm + 1), a
+    ld a, (ds1302_rv + 2) \ call bcdtoui8 \ ld (tm + 2), a
+    ld a, (ds1302_rv + 3) \ call bcdtoui8 \ ld (tm + 3), a
+    ld a, (ds1302_rv + 4) \ call bcdtoui8 \ ld (tm + 4), a
+    ld a, (ds1302_rv + 6) \ call bcdtoui8 \ ld (tm + 5), a
+    pop af
+    ret 
+
 ds1302_init:
     ld a, 0x00
     out (ds1302reg), a
@@ -49,6 +64,7 @@ ctime:
     ret
 ;ctime_buf: .block 20
 ctime_buf: .db "00-00-2000 00:00:00",0
+tm: .db 0,0,0,0,0,0     ; Struct tm: sec, min, hour, mday, mon, year
 
 ; ====================================================
 ; logic block that assumes registers are all ours
