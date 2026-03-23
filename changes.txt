@@ -1,3 +1,6 @@
+0.3.11
+- Added "star" animation to the neopixel ring.
+- Added "stargate" animation to the neopixel ring.
 0.3.10
 - Added a clock animation to display on the neopixel ring.
 - Changed the neo command: 

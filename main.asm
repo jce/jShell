@@ -97,11 +97,11 @@ main_clock_pass:
     ret
 
 main_pwm:
-    ld a, 0x00
-    out (0), a
     ld a, (pwm_enabled)
     or a
     jr z, pwm_enable_pass
+    ld a, 0x00
+    out (0), a
     call zero_pwm_data  
     ld a, c
     call sin
@@ -121,6 +121,8 @@ main_enablepwm:
 main_disablepwm:
     ld a, 0
     ld (pwm_enabled), a
+    ld a, 0x00
+    out (0), a
     call zero_pwm_data  
     ret
 

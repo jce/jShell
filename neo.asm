@@ -12,6 +12,9 @@ neo:
     ld hl, offstr   \ call strcmp \ jr z, neoofffound
     ld hl, neo_clock\ call strcmp \ jr z, neoclockfound
     ld hl, neo_tape \ call strcmp \ jr z, neotapefound
+    ld hl, neo_sg   \ call strcmp \ jr z, neosgfound
+    ld hl, neo_sg2  \ call strcmp \ jr z, neosgfound
+    ld hl, neo_star \ call strcmp \ jr z, neostarfound
     ld hl, de
     call hstoui16
     ld a, e
@@ -45,6 +48,18 @@ neotapefound:
     or a,   neo_mode_tape
     ld (neo_mode), a
     jr neooktext
+neosgfound:
+    ld a, (neo_mode)
+    and a,  0b11000000
+    or a,   neo_mode_sg
+    ld (neo_mode), a
+    jr neooktext
+neostarfound:
+    ld a, (neo_mode)
+    and a,  0b11000000
+    or a,   neo_mode_star
+    ld (neo_mode), a
+    jr neooktext
 neooktext:
     ld hl, lcd_ok_text  
     call sio_prstr_nl
@@ -53,10 +68,15 @@ neooktext:
 neo_mode:       .db     0x80 + neo_mode_tape
 neo_mode_clock: .equ    0x01
 neo_mode_tape:  .equ    0x02
+neo_mode_sg:    .equ    0x03
+neo_mode_star:  .equ    0x04
 neo_tape_step:  .db     0x00
 neo_bright:     .db     10
 neo_clock:      .db     "clock",0
 neo_tape:       .db     "tape",0
+neo_sg:         .db     "stargate",0
+neo_sg2:        .db     "sg",0
+neo_star:       .db     "star",0
 
 ; Function that gets cyclic called in the main loop
 neo_cyclic:
@@ -67,6 +87,8 @@ neo_cyclic:
     and 0b00111111
     cp  neo_mode_clock  \   jr z, neo_cyclic_clock
     cp  neo_mode_tape   \   jr z, neo_cyclic_tape
+    cp  neo_mode_sg     \   jr z, neo_cyclic_sg
+    cp  neo_mode_star   \   jr z, neo_cyclic_star
     jr neo_cyclic_end
 neo_cyclic_off:
     and 0b00111111
@@ -78,10 +100,105 @@ neo_cyclic_clock:
 neo_cyclic_tape:
     call neo_paint_tape
     jr neo_cyclic_end
+neo_cyclic_sg:
+    call neo_paint_sg
+    jr neo_cyclic_end
+neo_cyclic_star:
+    call neo_paint_star
+    jr neo_cyclic_end
 neo_cyclic_end:
     call neo_grb_to_cmd
     call neo_command_run
     ret
+
+; ==========================================================================
+; Paint function fills the grb buffer
+;Draw a stargate: 10 rotating lobes of altering color and rotation direction
+neo_paint_sg:
+    call calc_dt
+    call neo_calc_shift
+    call neo_calc_pos
+
+    ld a, (sg_pos) \ add 256/6*0 \ call sin \ call dim \ ld c, a \ ld b, 0 \ ld a, 0 \ call neo_grb_pixel
+    ld a, (sg_pos) \ add 256/6*1 \ call sin \ call dim \ ld c, a \ ld b, 0 \ ld a, 1 \ call neo_grb_pixel
+    ld a, (sg_pos) \ add 256/6*2 \ call sin \ call dim \ ld c, a \ ld b, 0 \ ld a, 2 \ call neo_grb_pixel
+    ld a, (sg_pos) \ add 256/6*3 \ call sin \ call dim \ ld c, a \ ld b, 0 \ ld a, 3 \ call neo_grb_pixel
+    ld a, (sg_pos) \ add 256/6*4 \ call sin \ call dim \ ld c, a \ ld b, 0 \ ld a, 4 \ call neo_grb_pixel
+    ld a, (sg_pos) \ add 256/6*5 \ call sin \ call dim \ ld c, a \ ld b, 0 \ ld a, 5 \ call neo_grb_pixel
+
+    ld ix, neo_grb
+    ld iy, neo_grb+6*3
+    ld b, 54*3
+grb_copy_loop:
+    ld a, (ix) \ inc ix
+    ld (iy), a \ inc iy
+    djnz grb_copy_loop     
+    ret
+
+; Calculate the dimming of the led. 
+; in: a = undimmed intensity
+; out a = dimmed intensity
+dim:
+    push de
+    push hl
+    ld d, 0
+    ld e, a
+    ld a, (neo_bright)
+    call Mul8       ; HL=A*DE
+    ld a, h
+    pop hl
+    pop de
+    ret
+
+neo_calc_pos:
+    ld a, (sg_shift) \ ld b, a
+    ld a, (sg_pos)
+    add b
+    ld (sg_pos), a
+    ret
+sg_pos: .db 0   ; position 0-0xff
+
+neo_calc_shift:
+    ld a, (dt)
+    ld d, 0
+    ld e, a
+    ld a, (sg_speed)
+    call Mul8   ; HL=DE*A
+    ld (sg_shift), hl
+    ret
+sg_shift:   .dw 0       ; Shift to do in the next animation step
+sg_speed:   .db 0x04    ; Speed of movement
+
+calc_dt:
+    push bc
+    ld a, (prev_ms) \ ld b, a
+    ld a, (ctc_ms_coun_ff)
+    ld (prev_ms), a
+    sub b
+    ld (dt), a
+    pop bc
+    ret
+dt: .db 0       ; dt, time difference [10 ms]
+prev_ms: .db 0  ; ms coun ff at the previous consult
+; ==========================================================================
+
+neo_paint_star:
+    call xrnd
+    ld a, h
+    call dim
+    ld c, a
+    call xrnd
+    ld a, h
+neo_paint_star_loop:
+    cp 3
+    jr c, neo_paint_star_continue
+    sub 3
+    jr neo_paint_star_loop
+neo_paint_star_continue:
+    ld b, a
+    ld a, l
+    call neo_grb_pixel
+    ret    
 
 ; Paint function fills the grb buffer
 ;Draw a clock

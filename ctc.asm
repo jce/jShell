@@ -33,6 +33,11 @@ ctc_isr0:
 ctc_isr1:
     push af
     push ix
+
+    ld a, (ctc_ms_coun_ff)
+    inc a
+    ld (ctc_ms_coun_ff), a
+
     ld a, (ctc_ms_counter)
     inc a
     cp a, 100
@@ -107,7 +112,8 @@ ctc_init:
     ld (ctc_s_counter+2), hl
     ret
 
-ctc_ms_counter: .db 0   ; Counts ms
+ctc_ms_counter: .db 0   ; Counts ms 0 to 99
+ctc_ms_coun_ff: .db 0   ; Counts ms 0 to 0xff
 ctc_s_counter:  .dw 0,0 ; Counts uptime [s]
 ctc_u_counter:  .dw 0,0 ; Counts runtime [s]
 ctc_s_flag:     .db 0   ; Set every second
