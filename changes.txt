@@ -1,3 +1,8 @@
+0.3.12
+- Moved log to 0xC000
+- Double sine tables, for different ranges
+- More colors in "neo star" animation
+- "neo tape2" animation, similar as "tape" but with faded corners.
 0.3.11
 - Added "star" animation to the neopixel ring.
 - Added "stargate" animation to the neopixel ring.

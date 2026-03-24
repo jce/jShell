@@ -21,6 +21,8 @@ proginit:
     ld i, a
     IM 2
     ei
+    ld a, 0
+    out (0), a
     call lcd_init
     call ds1302_init
     call log_startup       ; needs to be after the clock init
@@ -29,7 +31,7 @@ proginit:
     call trap_init          ; Needs to be after SIO_A
     call jshell_init
     call neo_init
-
+    
     ld b, 13
     call sio_prchr
     ld b, 10
@@ -104,7 +106,7 @@ main_pwm:
     out (0), a
     call zero_pwm_data  
     ld a, c
-    call sin
+    call sin2
     ld b, a
     call rain_in_bins
     call f_pwm

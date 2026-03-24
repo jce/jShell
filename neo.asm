@@ -15,6 +15,7 @@ neo:
     ld hl, neo_sg   \ call strcmp \ jr z, neosgfound
     ld hl, neo_sg2  \ call strcmp \ jr z, neosgfound
     ld hl, neo_star \ call strcmp \ jr z, neostarfound
+    ld hl, neo_tape2\ call strcmp \ jr z, neotape2found
     ld hl, de
     call hstoui16
     ld a, e
@@ -60,16 +61,23 @@ neostarfound:
     or a,   neo_mode_star
     ld (neo_mode), a
     jr neooktext
+neotape2found:
+    ld a, (neo_mode)
+    and a,  0b11000000
+    or a,   neo_mode_tape2
+    ld (neo_mode), a
+    jr neooktext
 neooktext:
     ld hl, lcd_ok_text  
     call sio_prstr_nl
     ret
 
-neo_mode:       .db     0x80 + neo_mode_tape
+neo_mode:       .db     0x80 + neo_mode_tape2
 neo_mode_clock: .equ    0x01
 neo_mode_tape:  .equ    0x02
 neo_mode_sg:    .equ    0x03
 neo_mode_star:  .equ    0x04
+neo_mode_tape2: .equ    0x05
 neo_tape_step:  .db     0x00
 neo_bright:     .db     10
 neo_clock:      .db     "clock",0
@@ -77,6 +85,7 @@ neo_tape:       .db     "tape",0
 neo_sg:         .db     "stargate",0
 neo_sg2:        .db     "sg",0
 neo_star:       .db     "star",0
+neo_tape2:      .db     "tape2",0
 
 ; Function that gets cyclic called in the main loop
 neo_cyclic:
@@ -89,6 +98,7 @@ neo_cyclic:
     cp  neo_mode_tape   \   jr z, neo_cyclic_tape
     cp  neo_mode_sg     \   jr z, neo_cyclic_sg
     cp  neo_mode_star   \   jr z, neo_cyclic_star
+    cp  neo_mode_tape2  \   jr z, neo_cyclic_tape2
     jr neo_cyclic_end
 neo_cyclic_off:
     and 0b00111111
@@ -106,6 +116,9 @@ neo_cyclic_sg:
 neo_cyclic_star:
     call neo_paint_star
     jr neo_cyclic_end
+neo_cyclic_tape2:
+    call neo_paint_tape2
+    jr neo_cyclic_end
 neo_cyclic_end:
     call neo_grb_to_cmd
     call neo_command_run
@@ -116,8 +129,8 @@ neo_cyclic_end:
 ;Draw a stargate: 10 rotating lobes of altering color and rotation direction
 neo_paint_sg:
     call calc_dt
-    call neo_calc_shift
-    call neo_calc_pos
+    call neo_sg_calc_shift
+    call neo_sg_calc_pos
 
     ld a, (sg_pos) \ add 256/6*0 \ call sin \ call dim \ ld c, a \ ld b, 0 \ ld a, 0 \ call neo_grb_pixel
     ld a, (sg_pos) \ add 256/6*1 \ call sin \ call dim \ ld c, a \ ld b, 0 \ ld a, 1 \ call neo_grb_pixel
@@ -150,7 +163,7 @@ dim:
     pop de
     ret
 
-neo_calc_pos:
+neo_sg_calc_pos:
     ld a, (sg_shift) \ ld b, a
     ld a, (sg_pos)
     add b
@@ -158,7 +171,7 @@ neo_calc_pos:
     ret
 sg_pos: .db 0   ; position 0-0xff
 
-neo_calc_shift:
+neo_sg_calc_shift:
     ld a, (dt)
     ld d, 0
     ld e, a
@@ -190,9 +203,9 @@ neo_paint_star:
     call xrnd
     ld a, h
 neo_paint_star_loop:
-    cp 3
+    cp 7
     jr c, neo_paint_star_continue
-    sub 3
+    sub 7
     jr neo_paint_star_loop
 neo_paint_star_continue:
     ld b, a
@@ -237,7 +250,7 @@ neo_paint_clock_hour_dot:
     dec d
     jr nz, neo_paint_clock_hour_dot
     ret
-
+;------------------------------------------------------------------------------------------------------
 ; Paint function fills the grb buffer
 ; Paints a tape recorder reel rotating
 neo_paint_tape:
@@ -271,6 +284,96 @@ neo_paint_tape_continue:
     call neo_grb_line_color
 
     ret
+
+neo_paint_tape2:
+    call calc_dt
+    call neo_tape2_calc_shift
+    call neo_tape2_calc_pos
+
+    ld a, (neo_tape2_pos) \ add  256*0/ 20 \ call act \ call dim \ ld c, a \ ld b, 3 \ ld a, 0 \ call neo_grb_pixel  
+    ld a, (neo_tape2_pos) \ add  256*1/ 20 \ call act \ call dim \ ld c, a \ ld b, 3 \ ld a, 1 \ call neo_grb_pixel  
+    ld a, (neo_tape2_pos) \ add  256*2/ 20 \ call act \ call dim \ ld c, a \ ld b, 3 \ ld a, 2 \ call neo_grb_pixel  
+    ld a, (neo_tape2_pos) \ add  256*3/ 20 \ call act \ call dim \ ld c, a \ ld b, 3 \ ld a, 3 \ call neo_grb_pixel  
+    ld a, (neo_tape2_pos) \ add  256*4 /20 \ call act \ call dim \ ld c, a \ ld b, 3 \ ld a, 4 \ call neo_grb_pixel  
+    ld a, (neo_tape2_pos) \ add  256*5 /20 \ call act \ call dim \ ld c, a \ ld b, 3 \ ld a, 5 \ call neo_grb_pixel  
+    ld a, (neo_tape2_pos) \ add  256*6 /20 \ call act \ call dim \ ld c, a \ ld b, 3 \ ld a, 6 \ call neo_grb_pixel  
+    ld a, (neo_tape2_pos) \ add  256*7 /20 \ call act \ call dim \ ld c, a \ ld b, 3 \ ld a, 7 \ call neo_grb_pixel  
+    ld a, (neo_tape2_pos) \ add  256*8 /20 \ call act \ call dim \ ld c, a \ ld b, 3 \ ld a, 8 \ call neo_grb_pixel  
+    ld a, (neo_tape2_pos) \ add  256*9 /20 \ call act \ call dim \ ld c, a \ ld b, 3 \ ld a, 9 \ call neo_grb_pixel  
+    ld a, (neo_tape2_pos) \ add  256*10/20 \ call act \ call dim \ ld c, a \ ld b, 3 \ ld a, 10\ call neo_grb_pixel  
+    ld a, (neo_tape2_pos) \ add  256*11/20 \ call act \ call dim \ ld c, a \ ld b, 3 \ ld a, 11\ call neo_grb_pixel  
+    ld a, (neo_tape2_pos) \ add  256*12/20 \ call act \ call dim \ ld c, a \ ld b, 3 \ ld a, 12\ call neo_grb_pixel  
+    ld a, (neo_tape2_pos) \ add  256*13/20 \ call act \ call dim \ ld c, a \ ld b, 3 \ ld a, 13\ call neo_grb_pixel  
+    ld a, (neo_tape2_pos) \ add  256*14/20 \ call act \ call dim \ ld c, a \ ld b, 3 \ ld a, 14\ call neo_grb_pixel  
+    ld a, (neo_tape2_pos) \ add  256*15/20 \ call act \ call dim \ ld c, a \ ld b, 3 \ ld a, 15\ call neo_grb_pixel  
+    ld a, (neo_tape2_pos) \ add  256*16/20 \ call act \ call dim \ ld c, a \ ld b, 3 \ ld a, 16\ call neo_grb_pixel  
+    ld a, (neo_tape2_pos) \ add  256*17/20 \ call act \ call dim \ ld c, a \ ld b, 3 \ ld a, 17\ call neo_grb_pixel  
+    ld a, (neo_tape2_pos) \ add  256*18/20 \ call act \ call dim \ ld c, a \ ld b, 3 \ ld a, 18\ call neo_grb_pixel  
+    ld a, (neo_tape2_pos) \ add  256*19/20 \ call act \ call dim \ ld c, a \ ld b, 3 \ ld a, 19\ call neo_grb_pixel  
+
+    ld ix, neo_grb
+    ld iy, neo_grb+20*3
+    ld b, 40*3
+grb_copy_loop2:
+    ld a, (ix) \ inc ix
+    ld (iy), a \ inc iy
+    djnz grb_copy_loop2    
+    ret;
+
+; Calculate activation for a point on the position curve
+; in: a - point on position curve
+; out: a - activation at this point of curve
+flanklen:   .equ    3 * 256 / 20
+toplen:     .equ    90
+endlen:     .equ    toplen+flanklen
+act:
+    cp flanklen \ jr c, q1
+    cp toplen   \ jr c, q2
+    cp endlen   \ jr c, q3
+                  jr    q4
+q1:
+    ld h, a         ; Load in high byte: a * 0x100
+    ld l, 0         ; y - a / flanklen * ff
+    ld d, flanklen  ; 
+    call Div8       ; HL=HL/D
+    ld a, l
+    ret
+q2:
+    ld a, 0xff
+    ret
+q3:
+    sub toplen
+    ld h, a
+    ld l, 0
+    ld d, flanklen
+    call Div8       ; HL = HL/D
+    ld a, 0xff
+    sub l
+    ret
+q4:
+    ld a, 0
+    ret
+
+neo_tape2_calc_pos:
+    ld a, (neo_tape2_shift) \ ld b, a ; Loads only the low byte of shift
+    ld a, (neo_tape2_pos)
+    add b
+    ld (neo_tape2_pos), a
+    ret
+
+neo_tape2_calc_shift:
+    ld a, (dt)
+    ld d, 0
+    ld e, a
+    ld a, (neo_tape2_speed)
+    call Mul8   ; HL=DE*A
+    ld (neo_tape2_shift), hl
+    ret
+
+neo_tape2_speed:    .db 2   ; Steps in position per dt
+neo_tape2_shift:    .dw 0   ; Shift of animation, dt * speed
+neo_tape2_pos:      .db 0   ; position 0-0xff, pos + shift
+;------------------------------------------------------------------------------------------------------
 
 ; Add line section with color
 ; a - start pixel
@@ -312,9 +415,41 @@ neo_grb_line_end:
 
 ; Add a value to a grb cell. Folds cell numbers.
 ; a - pixel number
-; b - g (0), r (1), b (2)
+; b - g (0), r (1), b (2), w(3)
 ; c - quantity to add
 neo_grb_pixel:
+    push af
+    ld a, b
+    cp 3 \ jr z, neo_grb_white
+    cp 4 \ jr z, neo_grb_rb
+    cp 5 \ jr z, neo_grb_bg
+    cp 6 \ jr z, neo_grb_gr
+    pop af
+    call neo_grb_pixel2
+    ret
+neo_grb_white:
+    pop af
+    ld b, 0 \ call neo_grb_pixel2
+    ld b, 1 \ call neo_grb_pixel2
+    ld b, 2 \ call neo_grb_pixel2
+    ret
+neo_grb_rb:
+    pop af
+    ld b, 1 \ call neo_grb_pixel2
+    ld b, 2 \ call neo_grb_pixel2
+    ret
+neo_grb_bg:
+    pop af
+    ld b, 0 \ call neo_grb_pixel2
+    ld b, 2 \ call neo_grb_pixel2
+    ret
+neo_grb_gr:
+    pop af
+    ld b, 0 \ call neo_grb_pixel2
+    ld b, 1 \ call neo_grb_pixel2
+    ret
+
+neo_grb_pixel2:
     push af
     push bc
     push de
@@ -342,6 +477,9 @@ neo_grb_add_continue:
     ld a, (hl)
     ; store increased value
     add a, d
+    jr nc, neo_grb_nocarry
+    ld a, 0xff
+neo_grb_nocarry:
     ld (hl), a
     pop hl
     pop de
