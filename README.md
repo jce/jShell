@@ -2,4 +2,4 @@ Hobby project to learn to code assembly. It uses the RC2014 computer kit. It pro
 
 Building is done with zasm (https://github.com/Megatokio/zasm).
 
-<img src="Screenshot at 2026-03-24 19-36-09.png" alt="jShell 0.3.12" width="600" height="400">
+<img src="Screenshot at 2026-03-24 19-36-09.png" alt="jShell 0.3.12" width="500">
