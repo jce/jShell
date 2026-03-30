@@ -1,3 +1,5 @@
+0.3.14
+- neo tape2, tape3, tape4, tape5 and tape6 collection is complete. Speed is slightly different per mode
 0.3.13
 - Runtime counter is safe from hex uploads.
 0.3.12

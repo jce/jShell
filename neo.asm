@@ -8,19 +8,23 @@ neo:
     jr nz, neononefound
     inc hl \ inc hl
     ld de, (hl)
-    ld hl, onstr    \ call strcmp \ jr z, neoonfound
-    ld hl, offstr   \ call strcmp \ jr z, neoofffound
-    ld hl, neo_clock\ call strcmp \ jr z, neoclockfound
-    ld hl, neo_tape \ call strcmp \ jr z, neotapefound
-    ld hl, neo_sg   \ call strcmp \ jr z, neosgfound
-    ld hl, neo_sg2  \ call strcmp \ jr z, neosgfound
-    ld hl, neo_star \ call strcmp \ jr z, neostarfound
-    ld hl, neo_tape2\ call strcmp \ jr z, neotape2found
+    ld hl, onstr    \ call strcmp \ jp z, neoonfound
+    ld hl, offstr   \ call strcmp \ jp z, neoofffound
+    ld hl, neo_clock\ call strcmp \ jp z, neoclockfound
+    ld hl, neo_tape \ call strcmp \ jp z, neotapefound
+    ld hl, neo_sg   \ call strcmp \ jp z, neosgfound
+    ld hl, neo_sg2  \ call strcmp \ jp z, neosgfound
+    ld hl, neo_star \ call strcmp \ jp z, neostarfound
+    ld hl, neo_tape2\ call strcmp \ jp z, neotape2found
+    ld hl, neo_tape3\ call strcmp \ jp z, neotape3found
+    ld hl, neo_tape4\ call strcmp \ jp z, neotape4found
+    ld hl, neo_tape5\ call strcmp \ jp z, neotape5found
+    ld hl, neo_tape6\ call strcmp \ jp z, neotape6found
     ld hl, de
     call hstoui16
     ld a, e
     ld (neo_bright), a
-    jr neooktext
+    jp neooktext
 neononefound:
     ld hl, nonefound
     call sio_prstr_nl
@@ -67,17 +71,45 @@ neotape2found:
     or a,   neo_mode_tape2
     ld (neo_mode), a
     jr neooktext
+neotape3found:
+    ld a, (neo_mode)
+    and a,  0b11000000
+    or a,   neo_mode_tape3
+    ld (neo_mode), a
+    jr neooktext
+neotape4found:
+    ld a, (neo_mode)
+    and a,  0b11000000
+    or a,   neo_mode_tape4
+    ld (neo_mode), a
+    jr neooktext
+neotape5found:
+    ld a, (neo_mode)
+    and a,  0b11000000
+    or a,   neo_mode_tape5
+    ld (neo_mode), a
+    jr neooktext
+neotape6found:
+    ld a, (neo_mode)
+    and a,  0b11000000
+    or a,   neo_mode_tape6
+    ld (neo_mode), a
+    jr neooktext
 neooktext:
     ld hl, lcd_ok_text  
     call sio_prstr_nl
     ret
 
-neo_mode:       .db     0x80 + neo_mode_tape2
+neo_mode:       .db     0x80 + neo_mode_tape3
 neo_mode_clock: .equ    0x01
 neo_mode_tape:  .equ    0x02
 neo_mode_sg:    .equ    0x03
 neo_mode_star:  .equ    0x04
 neo_mode_tape2: .equ    0x05
+neo_mode_tape3: .equ    0x06
+neo_mode_tape4: .equ    0x07
+neo_mode_tape5: .equ    0x08
+neo_mode_tape6: .equ    0x09
 neo_tape_step:  .db     0x00
 neo_bright:     .db     10
 neo_clock:      .db     "clock",0
@@ -86,6 +118,10 @@ neo_sg:         .db     "stargate",0
 neo_sg2:        .db     "sg",0
 neo_star:       .db     "star",0
 neo_tape2:      .db     "tape2",0
+neo_tape3:      .db     "tape3",0
+neo_tape4:      .db     "tape4",0
+neo_tape5:      .db     "tape5",0
+neo_tape6:      .db     "tape6",0
 
 ; Function that gets cyclic called in the main loop
 neo_cyclic:
@@ -99,6 +135,10 @@ neo_cyclic:
     cp  neo_mode_sg     \   jr z, neo_cyclic_sg
     cp  neo_mode_star   \   jr z, neo_cyclic_star
     cp  neo_mode_tape2  \   jr z, neo_cyclic_tape2
+    cp  neo_mode_tape3  \   jr z, neo_cyclic_tape3
+    cp  neo_mode_tape4  \   jr z, neo_cyclic_tape4
+    cp  neo_mode_tape5  \   jr z, neo_cyclic_tape5
+    cp  neo_mode_tape6  \   jr z, neo_cyclic_tape6
     jr neo_cyclic_end
 neo_cyclic_off:
     and 0b00111111
@@ -119,260 +159,27 @@ neo_cyclic_star:
 neo_cyclic_tape2:
     call neo_paint_tape2
     jr neo_cyclic_end
+neo_cyclic_tape3:
+    call neo_paint_tape3
+    jr neo_cyclic_end
+neo_cyclic_tape4:
+    call neo_paint_tape4
+    jr neo_cyclic_end
+neo_cyclic_tape5:
+    call neo_paint_tape5
+    jr neo_cyclic_end
+neo_cyclic_tape6:
+    call neo_paint_tape6
+    jr neo_cyclic_end
 neo_cyclic_end:
     call neo_grb_to_cmd
     call neo_command_run
     ret
 
-; ==========================================================================
-; Paint function fills the grb buffer
-;Draw a stargate: 10 rotating lobes of altering color and rotation direction
-neo_paint_sg:
-    call calc_dt
-    call neo_sg_calc_shift
-    call neo_sg_calc_pos
-
-    ld a, (sg_pos) \ add 256/6*0 \ call sin \ call dim \ ld c, a \ ld b, 0 \ ld a, 0 \ call neo_grb_pixel
-    ld a, (sg_pos) \ add 256/6*1 \ call sin \ call dim \ ld c, a \ ld b, 0 \ ld a, 1 \ call neo_grb_pixel
-    ld a, (sg_pos) \ add 256/6*2 \ call sin \ call dim \ ld c, a \ ld b, 0 \ ld a, 2 \ call neo_grb_pixel
-    ld a, (sg_pos) \ add 256/6*3 \ call sin \ call dim \ ld c, a \ ld b, 0 \ ld a, 3 \ call neo_grb_pixel
-    ld a, (sg_pos) \ add 256/6*4 \ call sin \ call dim \ ld c, a \ ld b, 0 \ ld a, 4 \ call neo_grb_pixel
-    ld a, (sg_pos) \ add 256/6*5 \ call sin \ call dim \ ld c, a \ ld b, 0 \ ld a, 5 \ call neo_grb_pixel
-
-    ld ix, neo_grb
-    ld iy, neo_grb+6*3
-    ld b, 54*3
-grb_copy_loop:
-    ld a, (ix) \ inc ix
-    ld (iy), a \ inc iy
-    djnz grb_copy_loop     
-    ret
-
-; Calculate the dimming of the led. 
-; in: a = undimmed intensity
-; out a = dimmed intensity
-dim:
-    push de
-    push hl
-    ld d, 0
-    ld e, a
-    ld a, (neo_bright)
-    call Mul8       ; HL=A*DE
-    ld a, h
-    pop hl
-    pop de
-    ret
-
-neo_sg_calc_pos:
-    ld a, (sg_shift) \ ld b, a
-    ld a, (sg_pos)
-    add b
-    ld (sg_pos), a
-    ret
-sg_pos: .db 0   ; position 0-0xff
-
-neo_sg_calc_shift:
-    ld a, (dt)
-    ld d, 0
-    ld e, a
-    ld a, (sg_speed)
-    call Mul8   ; HL=DE*A
-    ld (sg_shift), hl
-    ret
-sg_shift:   .dw 0       ; Shift to do in the next animation step
-sg_speed:   .db 0x04    ; Speed of movement
-
-calc_dt:
-    push bc
-    ld a, (prev_ms) \ ld b, a
-    ld a, (ctc_ms_coun_ff)
-    ld (prev_ms), a
-    sub b
-    ld (dt), a
-    pop bc
-    ret
-dt: .db 0       ; dt, time difference [10 ms]
-prev_ms: .db 0  ; ms coun ff at the previous consult
-; ==========================================================================
-
-neo_paint_star:
-    call xrnd
-    ld a, h
-    call dim
-    ld c, a
-    call xrnd
-    ld a, h
-neo_paint_star_loop:
-    cp 7
-    jr c, neo_paint_star_continue
-    sub 7
-    jr neo_paint_star_loop
-neo_paint_star_continue:
-    ld b, a
-    ld a, l
-    call neo_grb_pixel
-    ret    
-
-; Paint function fills the grb buffer
-;Draw a clock
-neo_paint_clock:
-    ld a, (neo_bright)
-    ld c, a
-    call mktime
-    ld a, (tm + 0)  \ ld b, 2 \ call neo_grb_pixel  ; Second hand 
-    ld a, (tm + 1)  \ ld b, 0 \ call neo_grb_pixel  ; Minute hand
-    ld a, (tm + 2) ; a is hours [0-23], scale to 60 [0-59]. Hours * 5 + minutes / 12
-    ld h, a
-    ld e, 5
-    call Mul8b      ; HL=H*E
-    ld e, l         ; e = Hours * 5
-    ld a, (tm + 1)
-    ld H, 0
-    ld l, a
-    ld d, 12
-    call Div8       ; HL=HL/D, l = Minutes / 12
-    ld a, l
-    add a, e
-    ld l, a
-    ld a, (neo_bright)
-    ld c, a
-    ld a, l         \ ld b, 1 \ call neo_grb_pixel  ; Hour hand
-
-    ; Draw dots for hours. Half the brightness for the 12 hour dot, another half the brightness
-    ; for the other hour dots.
-    ld a, c \ srl a \ ld c, a
-    ld a, 0 \ ld b, 0  \ call neo_grb_pixel \ ld b, 1 \ call neo_grb_pixel \ ld b, 2 \ call neo_grb_pixel
-    ld a, c \ srl a \ ld c, a
-    ld a, 0
-    ld d, 11
-neo_paint_clock_hour_dot:
-    add a, 5 \ ld b, 0 \ call neo_grb_pixel \ ld b, 1 \ call neo_grb_pixel \ ld b, 2 \ call neo_grb_pixel
-    dec d
-    jr nz, neo_paint_clock_hour_dot
-    ret
 ;------------------------------------------------------------------------------------------------------
-; Paint function fills the grb buffer
-; Paints a tape recorder reel rotating
-neo_paint_tape:
-    ld a, (neo_tape_step)
-    inc a
-    cp 120
-    jr nz, neo_paint_tape_continue
-    ld a, 0
-neo_paint_tape_continue:
-    ld (neo_tape_step), a
-
-    ; Reverse rotation direction
-    ld b, a
-    ld a, 120
-    sub a, b
-
-    ; a is displacement
-    srl a \ rl b; \ srl a \ rl b ; The rightmost bit is decimal
-    push af
-    ld a, (neo_bright)
-    ld c, a     ; intensitiy green
-    ld h, a     ; intensity red
-    ld l, a     ; intensity blue
-    ld d, 8     ; line length
-    pop af
-
-    call neo_grb_line_color
-    add a, 20
-    call neo_grb_line_color
-    add a, 20
-    call neo_grb_line_color
-
-    ret
-
-neo_paint_tape2:
-    call calc_dt
-    call neo_tape2_calc_shift
-    call neo_tape2_calc_pos
-
-    ld a, (neo_tape2_pos) \ add  256*0/ 20 \ call act \ call dim \ ld c, a \ ld b, 3 \ ld a, 0 \ call neo_grb_pixel  
-    ld a, (neo_tape2_pos) \ add  256*1/ 20 \ call act \ call dim \ ld c, a \ ld b, 3 \ ld a, 1 \ call neo_grb_pixel  
-    ld a, (neo_tape2_pos) \ add  256*2/ 20 \ call act \ call dim \ ld c, a \ ld b, 3 \ ld a, 2 \ call neo_grb_pixel  
-    ld a, (neo_tape2_pos) \ add  256*3/ 20 \ call act \ call dim \ ld c, a \ ld b, 3 \ ld a, 3 \ call neo_grb_pixel  
-    ld a, (neo_tape2_pos) \ add  256*4 /20 \ call act \ call dim \ ld c, a \ ld b, 3 \ ld a, 4 \ call neo_grb_pixel  
-    ld a, (neo_tape2_pos) \ add  256*5 /20 \ call act \ call dim \ ld c, a \ ld b, 3 \ ld a, 5 \ call neo_grb_pixel  
-    ld a, (neo_tape2_pos) \ add  256*6 /20 \ call act \ call dim \ ld c, a \ ld b, 3 \ ld a, 6 \ call neo_grb_pixel  
-    ld a, (neo_tape2_pos) \ add  256*7 /20 \ call act \ call dim \ ld c, a \ ld b, 3 \ ld a, 7 \ call neo_grb_pixel  
-    ld a, (neo_tape2_pos) \ add  256*8 /20 \ call act \ call dim \ ld c, a \ ld b, 3 \ ld a, 8 \ call neo_grb_pixel  
-    ld a, (neo_tape2_pos) \ add  256*9 /20 \ call act \ call dim \ ld c, a \ ld b, 3 \ ld a, 9 \ call neo_grb_pixel  
-    ld a, (neo_tape2_pos) \ add  256*10/20 \ call act \ call dim \ ld c, a \ ld b, 3 \ ld a, 10\ call neo_grb_pixel  
-    ld a, (neo_tape2_pos) \ add  256*11/20 \ call act \ call dim \ ld c, a \ ld b, 3 \ ld a, 11\ call neo_grb_pixel  
-    ld a, (neo_tape2_pos) \ add  256*12/20 \ call act \ call dim \ ld c, a \ ld b, 3 \ ld a, 12\ call neo_grb_pixel  
-    ld a, (neo_tape2_pos) \ add  256*13/20 \ call act \ call dim \ ld c, a \ ld b, 3 \ ld a, 13\ call neo_grb_pixel  
-    ld a, (neo_tape2_pos) \ add  256*14/20 \ call act \ call dim \ ld c, a \ ld b, 3 \ ld a, 14\ call neo_grb_pixel  
-    ld a, (neo_tape2_pos) \ add  256*15/20 \ call act \ call dim \ ld c, a \ ld b, 3 \ ld a, 15\ call neo_grb_pixel  
-    ld a, (neo_tape2_pos) \ add  256*16/20 \ call act \ call dim \ ld c, a \ ld b, 3 \ ld a, 16\ call neo_grb_pixel  
-    ld a, (neo_tape2_pos) \ add  256*17/20 \ call act \ call dim \ ld c, a \ ld b, 3 \ ld a, 17\ call neo_grb_pixel  
-    ld a, (neo_tape2_pos) \ add  256*18/20 \ call act \ call dim \ ld c, a \ ld b, 3 \ ld a, 18\ call neo_grb_pixel  
-    ld a, (neo_tape2_pos) \ add  256*19/20 \ call act \ call dim \ ld c, a \ ld b, 3 \ ld a, 19\ call neo_grb_pixel  
-
-    ld ix, neo_grb
-    ld iy, neo_grb+20*3
-    ld b, 40*3
-grb_copy_loop2:
-    ld a, (ix) \ inc ix
-    ld (iy), a \ inc iy
-    djnz grb_copy_loop2    
-    ret;
-
-; Calculate activation for a point on the position curve
-; in: a - point on position curve
-; out: a - activation at this point of curve
-flanklen:   .equ    3 * 256 / 20
-toplen:     .equ    90
-endlen:     .equ    toplen+flanklen
-act:
-    cp flanklen \ jr c, q1
-    cp toplen   \ jr c, q2
-    cp endlen   \ jr c, q3
-                  jr    q4
-q1:
-    ld h, a         ; Load in high byte: a * 0x100
-    ld l, 0         ; y - a / flanklen * ff
-    ld d, flanklen  ; 
-    call Div8       ; HL=HL/D
-    ld a, l
-    ret
-q2:
-    ld a, 0xff
-    ret
-q3:
-    sub toplen
-    ld h, a
-    ld l, 0
-    ld d, flanklen
-    call Div8       ; HL = HL/D
-    ld a, 0xff
-    sub l
-    ret
-q4:
-    ld a, 0
-    ret
-
-neo_tape2_calc_pos:
-    ld a, (neo_tape2_shift) \ ld b, a ; Loads only the low byte of shift
-    ld a, (neo_tape2_pos)
-    add b
-    ld (neo_tape2_pos), a
-    ret
-
-neo_tape2_calc_shift:
-    ld a, (dt)
-    ld d, 0
-    ld e, a
-    ld a, (neo_tape2_speed)
-    call Mul8   ; HL=DE*A
-    ld (neo_tape2_shift), hl
-    ret
-
-neo_tape2_speed:    .db 2   ; Steps in position per dt
-neo_tape2_shift:    .dw 0   ; Shift of animation, dt * speed
-neo_tape2_pos:      .db 0   ; position 0-0xff, pos + shift
+.include "neo_stargate.asm"
+.include "neo_star_clock.asm"
+.include "neo_tape.asm"
 ;------------------------------------------------------------------------------------------------------
 
 ; Add line section with color
