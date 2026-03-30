@@ -1,7 +1,7 @@
 jshellname:
     .db 'jShell', 0
 jshellver:
-    .db '0.3.12', 0
+    .db '0.3.13', 0
 jshellprompt:
     .db ">", 0
 
@@ -139,7 +139,7 @@ helpi: .db "log init - Initialize the logfile.", 0
 helpj: .db "stackframe, sf - Experiment with stackframe technique(s).", 0
 helpk: .db "dump - Dump 0x000 to 0xF000 as intel hex.", 0
 helpl: .db "uptime - Display uptime [s].", 0
-helpl2:.db "runtime - Display cumulative runtime [s].", 0
+helpl2:.db "runtime [init]- Display cumulative runtime [s], init the runtime counter.", 0
 helpm: .db "di, ei - Disable interrupts, enable interrupts.", 0
 helpn: .db "go [0-FFFF] - run function at location.", 0
 helpo: .db "reset - Soft reset of processor.", 0

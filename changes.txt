@@ -1,3 +1,5 @@
+0.3.13
+- Runtime counter is safe from hex uploads.
 0.3.12
 - Moved log to 0xC000
 - Double sine tables, for different ranges

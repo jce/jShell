@@ -1,8 +1,34 @@
 ctc_addr    .equ    0x88
-
+    
 ctc_runtime:
+    ld a, e         ; Hunt for "xxx init"
+    cp 2            ; 2 words? 
+    jr nz, ctc_runtime_display
+    push hl         ; Remember hl
+    push de         ; Remember de
+    inc hl          ; Increment to word 1 (counting from 0)
+    inc hl          ;
+    ld de, (hl)     ; Get the string pointer from argv
+    ld hl, de       ;
+    ld de, str_init ;
+    call strcmp     ; Compare to "init"
+    pop de    
+    pop hl
+    jr nz, ctc_runtime_display
+    call ctc_runtime_init
+    ret
+
+ctc_runtime_init:
+    ld hl, log_location_c - 4
+    ld (hl), 0 \ inc hl
+    ld (hl), 0 \ inc hl
+    ld (hl), 0 \ inc hl
+    ld (hl), 0
+    ret
+
+ctc_runtime_display:
     sfo 20
-    ld de, ctc_u_counter
+    ld de, log_location_c - 4
     push ix
     pop hl
     call uint32tostr_dec
@@ -49,7 +75,7 @@ ctc_isr1:
     ld (ctc_s_flag), a    
     ld ix, ctc_s_counter
     call ctc_increment
-    ld ix, ctc_u_counter
+    ld ix, log_location_c - 4
     call ctc_increment
 ctc_isr1_end:
     pop ix
@@ -115,5 +141,5 @@ ctc_init:
 ctc_ms_counter: .db 0   ; Counts ms 0 to 99
 ctc_ms_coun_ff: .db 0   ; Counts ms 0 to 0xff
 ctc_s_counter:  .dw 0,0 ; Counts uptime [s]
-ctc_u_counter:  .dw 0,0 ; Counts runtime [s]
 ctc_s_flag:     .db 0   ; Set every second
+;ctc_u_counter:  .dw 0,0 ; Counts runtime [s]
