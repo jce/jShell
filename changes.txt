@@ -1,3 +1,6 @@
+0.3.15
+- neo rrod (red ring of death)
+- neo animations are called by list now.
 0.3.14
 - neo tape2, tape3, tape4, tape5 and tape6 collection is complete. Speed is slightly different per mode
 0.3.13

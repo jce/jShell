@@ -1,6 +1,7 @@
 ; 16bit prng, see http://www.retroprogramming.com/2017/07/xorshift-pseudorandom-numbers-in-z80.html
 ; Output: hl
 xrnd:
+    push af
     ld hl,1       ; seed must not be 0
 
     ld a,h
@@ -18,7 +19,8 @@ xrnd:
     xor h
     ld h,a
 
-    ld (xrnd+1),hl
+    ld (xrnd+2),hl
+    pop af
     ret
 
 ; https://tutorials.eeems.ca/Z80ASM/part4.htm

@@ -1,25 +1,62 @@
 neo_port:   .equ    0xA0    ; Port where the neopixel driver is located
 
+; Array with neopixel animation commands
+; Cannot mix bytes and words, so two lists.
+;   id, name,   drawfunc
+neopixel_commands:
+    .dw 0x0001, s_clock,    neo_paint_clock
+    .dw 0x0002, s_tape,     neo_paint_tape
+    .dw 0x0003, s_stargate, neo_paint_sg
+    .dw 0x0004, s_sg,       neo_paint_sg
+    .dw 0x0005, s_star,     neo_paint_star
+    .dw 0x0006, s_tape2,    neo_paint_tape2
+    .dw 0x0007, s_tape3,    neo_paint_tape3
+    .dw 0x0008, s_tape4,    neo_paint_tape4
+    .dw 0x0009, s_tape5,    neo_paint_tape5
+    .dw 0x000A, s_tape6,    neo_paint_tape6
+    .dw 0x000B, s_rrod,     neo_paint_rrod
+    .dw 0x0000
+
+s_clock:    .db "clock",0
+s_tape:     .db "tape",0
+s_stargate: .db "stargate",0
+s_sg:       .db "sg",0
+s_star:     .db "star",0
+s_tape2:    .db "tape2",0
+s_tape3:    .db "tape3",0
+s_tape4:    .db "tape4",0
+s_tape5:    .db "tape5",0
+s_tape6:    .db "tape6",0
+s_rrod:     .db "rrod",0
+
+neo_mode:       .db     0x80 + 7
+neo_bright:     .db     0x10
+
 ; A command gets argc in e and argv in hl
 neo:
     ld a, e
     or a
     cp 2
-    jr nz, neononefound
+    jp nz, neononefound ; only hl is important now, contains the string
     inc hl \ inc hl
     ld de, (hl)
     ld hl, onstr    \ call strcmp \ jp z, neoonfound
     ld hl, offstr   \ call strcmp \ jp z, neoofffound
-    ld hl, neo_clock\ call strcmp \ jp z, neoclockfound
-    ld hl, neo_tape \ call strcmp \ jp z, neotapefound
-    ld hl, neo_sg   \ call strcmp \ jp z, neosgfound
-    ld hl, neo_sg2  \ call strcmp \ jp z, neosgfound
-    ld hl, neo_star \ call strcmp \ jp z, neostarfound
-    ld hl, neo_tape2\ call strcmp \ jp z, neotape2found
-    ld hl, neo_tape3\ call strcmp \ jp z, neotape3found
-    ld hl, neo_tape4\ call strcmp \ jp z, neotape4found
-    ld hl, neo_tape5\ call strcmp \ jp z, neotape5found
-    ld hl, neo_tape6\ call strcmp \ jp z, neotape6found
+
+    ld hl, neopixel_commands
+neo_next_cmd:
+    inc hl \ inc hl
+    ld bc, (hl)
+    push hl
+    ld hl, bc
+    call strcmp     ; a = ((de) - (hl))
+    pop hl
+    jp z, neo_command_found
+    inc hl \ inc hl \ inc hl \ inc hl
+    ld a, (hl)
+    or a
+    jr nz, neo_next_cmd
+
     ld hl, de
     call hstoui16
     ld a, e
@@ -34,94 +71,26 @@ neoonfound:
     and a,  0b00111111
     or a,   0b10000000
     ld (neo_mode), a
-    jr neooktext
+    jp neooktext
 neoofffound:
     ld a, (neo_mode)
     and a,  0b00111111
     or a,   0b11000000
     ld (neo_mode), a
-    jr neooktext
-neoclockfound:
+    jp neooktext
+neo_command_found:
+    dec hl \ dec hl
+    ld a, (hl)
+    ld b, a
     ld a, (neo_mode)
     and a,  0b11000000
-    or a,   neo_mode_clock
+    or a,   b
     ld (neo_mode), a
-    jr neooktext
-neotapefound:
-    ld a, (neo_mode)
-    and a,  0b11000000
-    or a,   neo_mode_tape
-    ld (neo_mode), a
-    jr neooktext
-neosgfound:
-    ld a, (neo_mode)
-    and a,  0b11000000
-    or a,   neo_mode_sg
-    ld (neo_mode), a
-    jr neooktext
-neostarfound:
-    ld a, (neo_mode)
-    and a,  0b11000000
-    or a,   neo_mode_star
-    ld (neo_mode), a
-    jr neooktext
-neotape2found:
-    ld a, (neo_mode)
-    and a,  0b11000000
-    or a,   neo_mode_tape2
-    ld (neo_mode), a
-    jr neooktext
-neotape3found:
-    ld a, (neo_mode)
-    and a,  0b11000000
-    or a,   neo_mode_tape3
-    ld (neo_mode), a
-    jr neooktext
-neotape4found:
-    ld a, (neo_mode)
-    and a,  0b11000000
-    or a,   neo_mode_tape4
-    ld (neo_mode), a
-    jr neooktext
-neotape5found:
-    ld a, (neo_mode)
-    and a,  0b11000000
-    or a,   neo_mode_tape5
-    ld (neo_mode), a
-    jr neooktext
-neotape6found:
-    ld a, (neo_mode)
-    and a,  0b11000000
-    or a,   neo_mode_tape6
-    ld (neo_mode), a
-    jr neooktext
+    jp neooktext
 neooktext:
     ld hl, lcd_ok_text  
     call sio_prstr_nl
     ret
-
-neo_mode:       .db     0x80 + neo_mode_tape3
-neo_mode_clock: .equ    0x01
-neo_mode_tape:  .equ    0x02
-neo_mode_sg:    .equ    0x03
-neo_mode_star:  .equ    0x04
-neo_mode_tape2: .equ    0x05
-neo_mode_tape3: .equ    0x06
-neo_mode_tape4: .equ    0x07
-neo_mode_tape5: .equ    0x08
-neo_mode_tape6: .equ    0x09
-neo_tape_step:  .db     0x00
-neo_bright:     .db     10
-neo_clock:      .db     "clock",0
-neo_tape:       .db     "tape",0
-neo_sg:         .db     "stargate",0
-neo_sg2:        .db     "sg",0
-neo_star:       .db     "star",0
-neo_tape2:      .db     "tape2",0
-neo_tape3:      .db     "tape3",0
-neo_tape4:      .db     "tape4",0
-neo_tape5:      .db     "tape5",0
-neo_tape6:      .db     "tape6",0
 
 ; Function that gets cyclic called in the main loop
 neo_cyclic:
@@ -130,56 +99,66 @@ neo_cyclic:
     call neo_clear_grb
     bit 6, a            \   jr nz, neo_cyclic_off
     and 0b00111111
-    cp  neo_mode_clock  \   jr z, neo_cyclic_clock
-    cp  neo_mode_tape   \   jr z, neo_cyclic_tape
-    cp  neo_mode_sg     \   jr z, neo_cyclic_sg
-    cp  neo_mode_star   \   jr z, neo_cyclic_star
-    cp  neo_mode_tape2  \   jr z, neo_cyclic_tape2
-    cp  neo_mode_tape3  \   jr z, neo_cyclic_tape3
-    cp  neo_mode_tape4  \   jr z, neo_cyclic_tape4
-    cp  neo_mode_tape5  \   jr z, neo_cyclic_tape5
-    cp  neo_mode_tape6  \   jr z, neo_cyclic_tape6
+
+    ld b, a
+    ld hl, neopixel_commands
+    ld a, (hl)
+neo_cyclic_cmdloop:
+    cp a, b
+    jr nz, neo_cyclic_pass
+
+    inc hl \ inc hl \ inc hl \ inc hl
+    ld bc, (hl)
+    ld hl, neo_cyclic_end
+    push hl
+    ld hl, bc
+    jp hl
+
+neo_cyclic_pass:
+    inc hl \ inc hl
+    ld a, (hl)
+    or a
+    jr nz, neo_cyclic_cmdloop
+
     jr neo_cyclic_end
+
 neo_cyclic_off:
     and 0b00111111
     ld (neo_mode), a
-    jr neo_cyclic_end
-neo_cyclic_clock:
-    call neo_paint_clock
-    jr neo_cyclic_end
-neo_cyclic_tape:
-    call neo_paint_tape
-    jr neo_cyclic_end
-neo_cyclic_sg:
-    call neo_paint_sg
-    jr neo_cyclic_end
-neo_cyclic_star:
-    call neo_paint_star
-    jr neo_cyclic_end
-neo_cyclic_tape2:
-    call neo_paint_tape2
-    jr neo_cyclic_end
-neo_cyclic_tape3:
-    call neo_paint_tape3
-    jr neo_cyclic_end
-neo_cyclic_tape4:
-    call neo_paint_tape4
-    jr neo_cyclic_end
-neo_cyclic_tape5:
-    call neo_paint_tape5
-    jr neo_cyclic_end
-neo_cyclic_tape6:
-    call neo_paint_tape6
     jr neo_cyclic_end
 neo_cyclic_end:
     call neo_grb_to_cmd
     call neo_command_run
     ret
 
+neo_print_commands:
+    ld de, neopixel_commands
+neo_print_commands_loop:
+    inc de \ inc de
+    ld hl, de
+    ld bc, (hl)
+
+    push hl
+    ld hl, bc
+    ld b, ' '
+    call sio_prchr
+    call sio_prstr
+    pop hl
+
+    inc de \ inc de \ inc de \ inc de
+    ld a, (de)
+    or a
+    jr nz, neo_print_commands_loop
+
+    ld hl, sio_newline
+    call sio_prstr
+    ret
+
 ;------------------------------------------------------------------------------------------------------
 .include "neo_stargate.asm"
 .include "neo_star_clock.asm"
 .include "neo_tape.asm"
+.include "neo_rrod.asm"
 ;------------------------------------------------------------------------------------------------------
 
 ; Add line section with color

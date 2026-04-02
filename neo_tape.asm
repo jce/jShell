@@ -32,8 +32,7 @@ neo_paint_tape_continue:
     call neo_grb_line_color
 
     ret
-
-; ==========================================================================
+neo_tape_step:  .db     0x00
 
 neo_paint_tape2:
     call calc_dt
@@ -134,7 +133,6 @@ neo_tape2_speed:    .db 2   ; Steps in position per dt
 neo_tape2_shift:    .dw 0   ; Shift of animation, dt * speed
 neo_tape2_pos:      .db 0   ; position 0-0xff, pos + shift
 
-; ======================================================================================================
 neo_paint_tape3:
     call calc_dt
     call neo_tape2_calc_shift

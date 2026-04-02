@@ -1,7 +1,7 @@
 jshellname:
     .db 'jShell', 0
 jshellver:
-    .db '0.3.14', 0
+    .db '0.3.15', 0
 jshellprompt:
     .db ">", 0
 
@@ -116,6 +116,7 @@ help:
     ld hl, helpq        \ call sio_prstr_nl
     ld hl, helpv        \ call sio_prstr_nl
     ld hl, helpw        \ call sio_prstr_nl
+    call neo_print_commands
     ret
 help0: .db "Help function.", 0
 help1: .db " ", 0
@@ -146,7 +147,7 @@ helpo: .db "reset - Soft reset of processor.", 0
 helpp: .db "trap - Trigger the trap function.", 0
 helpq: .db "strange - where is the strange label?", 0
 helpv: .db "ramtest - Do the ramtest. Overwrites stack.", 0
-helpw: .db "neo, n [on/off, clock, tape, 0x00-0xFF] - Turn neopixel animation on or off, to clock, tape, tape2-6, star, stargate/sg, intensity.", 0
+helpw: .db "neo, n [on/off, animation, 0x00-0xFF] - Change neopixel animation, set on, off, intensity. Animations:", 0
 
 ; A command gets argc in e and argv in hl
 
