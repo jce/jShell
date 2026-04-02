@@ -1,3 +1,6 @@
+0.3.16
+- bugfix
+- static rainbows: rb, rb2
 0.3.15
 - neo rrod (red ring of death)
 - neo animations are called by list now.

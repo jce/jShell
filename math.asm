@@ -31,6 +31,8 @@ xrnd:
 ; sin       A=SIN(A)        
 
 Mul8:                            ; this routine performs the operation HL=DE*A DE can be signed or unsigned, A is unsigned.
+  push bc
+  push de
   ld hl,0                        ; HL is used to accumulate the result
   ld b,8                         ; the multiplier (A) is 8 bits wide
 Mul8Loop:
@@ -41,6 +43,8 @@ Mul8Skip:
   sla e                          ; calculating the next auxiliary product by shifting
   rl d                           ; DE one bit leftwards (refer to the shift instructions!)
   djnz Mul8Loop
+  pop de
+  pop bc
   ret
 
 
@@ -58,6 +62,9 @@ Mul8bSkip:
 
 
 Div8:                            ; this routine performs the operation HL=HL/D
+  push af
+  push bc
+  push de
   xor a                          ; clearing the upper 8 bits of AHL
   ld b,16                        ; the length of the dividend (16 bits)
 Div8Loop:
@@ -69,6 +76,9 @@ Div8Loop:
   inc l                          ; and setting the next digit of the quotient
 Div8NextBit:
   djnz Div8Loop
+  pop de
+  pop bc
+  pop af
   ret
 
 

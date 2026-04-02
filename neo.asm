@@ -15,6 +15,8 @@ neopixel_commands:
     .dw 0x0009, s_tape5,    neo_paint_tape5
     .dw 0x000A, s_tape6,    neo_paint_tape6
     .dw 0x000B, s_rrod,     neo_paint_rrod
+    .dw 0x000C, s_rainbow,  neo_paint_rainbow
+    .dw 0x000D, s_rb2,      neo_paint_rainbow2
     .dw 0x0000
 
 s_clock:    .db "clock",0
@@ -28,8 +30,10 @@ s_tape4:    .db "tape4",0
 s_tape5:    .db "tape5",0
 s_tape6:    .db "tape6",0
 s_rrod:     .db "rrod",0
+s_rainbow:  .db "rb",0
+s_rb2:      .db "rb2",0
 
-neo_mode:       .db     0x80 + 7
+neo_mode:       .db     0x80 + 0x0C
 neo_bright:     .db     0x10
 
 ; A command gets argc in e and argv in hl
@@ -99,15 +103,16 @@ neo_cyclic:
     call neo_clear_grb
     bit 6, a            \   jr nz, neo_cyclic_off
     and 0b00111111
+    
 
     ld b, a
     ld hl, neopixel_commands
     ld a, (hl)
 neo_cyclic_cmdloop:
+    inc hl \ inc hl \ inc hl \ inc hl
     cp a, b
     jr nz, neo_cyclic_pass
 
-    inc hl \ inc hl \ inc hl \ inc hl
     ld bc, (hl)
     ld hl, neo_cyclic_end
     push hl
@@ -119,7 +124,7 @@ neo_cyclic_pass:
     ld a, (hl)
     or a
     jr nz, neo_cyclic_cmdloop
-
+    
     jr neo_cyclic_end
 
 neo_cyclic_off:
@@ -159,6 +164,7 @@ neo_print_commands_loop:
 .include "neo_star_clock.asm"
 .include "neo_tape.asm"
 .include "neo_rrod.asm"
+.include "neo_rainbow.asm"
 ;------------------------------------------------------------------------------------------------------
 
 ; Add line section with color
