@@ -1,6 +1,9 @@
 ;------------------------------------------------------------------------------------------------------
 ; Paint function fills the grb buffer
 neo_paint_rainbow:
+    call calc_dt
+    call neo_rb_calc_shift
+    call neo_tape2_calc_pos
     ; for led b in range 0-59
     ld d, 60
     
@@ -13,9 +16,13 @@ neo_paint_rainbow_pixel_loop:
     ld l, 0
     ld d, 60
     call Div8   ; HL = HL / D
-    ld e, l
-    ld d, b
+    ld e, l     ; [0-ff] for 1 rotation
+    ld d, b   
     
+    ld a, (neo_tape2_pos)
+    sub e
+    ld e, a 
+
     ; Activation for color 1
     ld a, e
     call sin
@@ -52,6 +59,9 @@ neo_paint_rainbow_pixel_loop:
     ret
 
 neo_paint_rainbow2:
+    call calc_dt
+    call neo_rb_calc_shift
+    call neo_tape2_calc_pos
     ; for led b in range 0-59
     ld d, 60
     
@@ -67,6 +77,10 @@ neo_paint_rainbow_pixel_loop2:
     ld e, l
     ld d, b
     
+    ld a, (neo_tape2_pos)
+    sub e
+    ld e, a 
+
     ; Activation for color 1
     ld a, e
     call rb2_activation
@@ -136,38 +150,11 @@ rb2_q3:
     ld a, 0
     ret
 
-
-neo_grb_scale_brightness
-    ; Just scale every color of every pixel according to neo_bright
-    ; Pixel brightness scaled = pixel brightness * neo_bright / 256
-    ld ix, neo_grb
-    ld b, 60*3
+neo_rb_calc_shift:
+    ld a, (dt)
     ld d, 0
-    ld a, (neo_bright)  
-neo_grb_scale_brightness_loop:
-    ld e, (ix)
-    call Mul8           ;   HL = DE * A    
-    ld (ix), h
-    inc ix
-    djnz neo_grb_scale_brightness_loop
+    ld e, a
+    ld a, 1
+    call Mul8
+    ld (neo_tape2_shift), hl
     ret
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

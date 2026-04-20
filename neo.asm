@@ -17,6 +17,7 @@ neopixel_commands:
     .dw 0x000B, s_rrod,     neo_paint_rrod
     .dw 0x000C, s_rainbow,  neo_paint_rainbow
     .dw 0x000D, s_rb2,      neo_paint_rainbow2
+    .dw 0x000E, s_rodo,     neo_paint_rodo
     .dw 0x0000
 
 s_clock:    .db "clock",0
@@ -32,8 +33,9 @@ s_tape6:    .db "tape6",0
 s_rrod:     .db "rrod",0
 s_rainbow:  .db "rb",0
 s_rb2:      .db "rb2",0
+s_rodo:     .db "rodo",0
 
-neo_mode:       .db     0x80 + 0x0C
+neo_mode:       .db     0x80 + 0x0E
 neo_bright:     .db     0x10
 
 ; A command gets argc in e and argv in hl
@@ -165,7 +167,23 @@ neo_print_commands_loop:
 .include "neo_tape.asm"
 .include "neo_rrod.asm"
 .include "neo_rainbow.asm"
+.include "neo_rodo.asm"
 ;------------------------------------------------------------------------------------------------------
+
+; Scale every color of every pixel according to neo_bright
+; Pixel brightness scaled = pixel brightness * neo_bright / 256
+neo_grb_scale_brightness
+    ld ix, neo_grb
+    ld b, 60*3
+    ld d, 0
+    ld a, (neo_bright)  
+neo_grb_scale_brightness_loop:
+    ld e, (ix)
+    call Mul8           ;   HL = DE * A    
+    ld (ix), h
+    inc ix
+    djnz neo_grb_scale_brightness_loop
+    ret
 
 ; Add line section with color
 ; a - start pixel
