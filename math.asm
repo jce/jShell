@@ -98,6 +98,39 @@ NoMul16:
   jp nz,Mul16Loop
   ret
 
+; HL = HL + DE already exists as cpu instruction, "ADD HL, DE"
+
+; HL = HL - DE
+Sub16:
+    or a        ; Clear carry
+    sbc hl, de  ; Sub with carry
+    ret
+
+; Similar to Sub16, but does not change HL. Sets flags.
+Cmp16:
+    push hl
+    call Sub16
+    pop hl
+    ret
+
+; Shift right uint16. HL = HL >> A
+Shr16:
+    or a
+    ret z
+    srl h
+    rr l
+    dec a
+    jr Shr16
+    ret
+
+; Shift left uint16. HL = HL << A
+Shl16:
+    or a
+    ret z
+    sla l
+    rl h
+    add a
+    jr Shl16
 
 ; function a = cos(a). Input range 256, output range 0-255.999
 cos:

@@ -19,14 +19,22 @@ neo_paint_rodo:
     ret;
 
 neo_rodo_calc_pos:
-    ld a, (neo_rodo_shift) \ ld b, a ; Loads only the low byte of shift
-    ld a, (neo_rodo_pos)
-    add b
+    ld de, (neo_rodo_shift)
+    ld hl, (neo_rodo_posw)
+    add hl, de   
+ 
+    ld de, 240 << 6
+    call Cmp16  ; HL - DE -> Only carry bit
+    jr c, neo_rodo_calc_pos_2
+    call Sub16   ; HL = HL - DE
+neo_rodo_calc_pos_2:
+    ld (neo_rodo_posw), hl
+
+    ld a, 6
+    call Shr16  ; HL = HL >> A
+    ld a, l
     ld (neo_rodo_pos), a
-    cp 240
-    ret c
-    sub 240
-    ld (neo_rodo_pos), a
+
     ret
 
 neo_rodo_calc_shift:
@@ -38,6 +46,7 @@ neo_rodo_calc_shift:
     ld (neo_rodo_shift), hl
     ret
 
-neo_rodo_speed: .db 1   ; Steps in position per dt
+neo_rodo_speed: .db 96  ; Steps in position per dt / 64
 neo_rodo_shift: .dw 0   ; Shift of rotating dot, dt * speed
 neo_rodo_pos:   .db 0   ; Position on profile
+neo_rodo_posw:  .dw 0   ; Position on profile, word sized
