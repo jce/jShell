@@ -25,7 +25,7 @@ xrnd:
 
 ; https://tutorials.eeems.ca/Z80ASM/part4.htm
 ; Mul8:     HL=DE*A
-; MUL8b:    HL=H*E
+; Mul8b:    HL=H*E
 ; Mul16:    DEHL=BC*DE
 ; Div8:     HL=HL/D
 ; sin       A=SIN(A)        

@@ -55,7 +55,7 @@ dump_byte:
     ld l, a
     call sio_prstr_nl
 
-    ld a, 0xf0
+    ld a, 0xfc
     cp d
     jr nz, dump_line
     ld a, 0x00

@@ -28,15 +28,14 @@ proginit:
     call log_startup       ; needs to be after the clock init
     call SIO_A_RESET
     call ctc_init
-    call trap_init          ; Needs to be after SIO_A
     call jshell_init
     call neo_init
-    
+    call unit_init    
+
     ld b, 13
     call sio_prchr
     ld b, 10
     call sio_prchr
-strange:
     ld hl, jshellname
     call lcd_write_string
     ld b, ' '
@@ -77,6 +76,7 @@ mainloop:
     call main_command
     push bc
     call neo_cyclic
+    call main_unit
     pop bc
 
     ld a, (run_enabled)
@@ -182,9 +182,9 @@ main_locbuf:    .db 0,0,0,0,0
 #include "dump.asm"
 #include "ctc.asm"
 #include "uint32tostr.asm"
-#include "stackframe.asm"
-#include "trap.asm"
 #include "ramtest.asm"
 #include "neo.asm"
+#include "unit.asm"
+#include "unit_init.asm"
 end:
 .END

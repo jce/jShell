@@ -1,3 +1,7 @@
+0.4.0
+- Setup for ML experimentation. Introduced a range of blocks 0xA000-0xDFFF (16 k)
+- Removed some surplus functions.
+- Blocks: Read switch, write led.
 0.3.16
 - bugfix
 - static rainbows: rb, rb2

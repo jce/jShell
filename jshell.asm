@@ -1,41 +1,31 @@
 jshellname:
     .db 'jShell', 0
 jshellver:
-    .db '0.3.18', 0
+    .db '0.4.0', 0
 jshellprompt:
     .db ">", 0
 
-ctest:  .db "test", 0
 c_:     .db "?", 0
 cls:    .db "ls", 0
 chelp:  .db "help", 0
-cerror: .db "error", 0
 clcd:   .db "lcd", 0
 cin:    .db "in", 0
 cout:   .db "out", 0
 cfill:  .db "fill", 0
 cread:  .db "read", 0
 cread2:  .db "r", 0
-;cwrite:.db "write", 0
 ccopy:  .db "copy", 0
 cpwm:   .db "pwm", 0
-cret:   .db "ret", 0
 chl:    .db "hl", 0
 chexload:.db "hexload", 0
 csp:    .db "sp", 0
 cclock: .db "clock", 0
 clog:   .db "log", 0
-csf1:   .db "sf", 0
-csf2:   .db "stackframe", 0
 cdump:  .db "dump", 0
 cuptime:.db"uptime", 0
 cruntime:.db"runtime", 0
-cdi:    .db"di", 0
-cei:    .db"ei", 0
 cgo:    .db"go", 0
 creset: .db"reset", 0
-ctrap:  .db"trap", 0
-cstrange:.db"strange", 0
 crtest: .db"ramtest", 0
 cneo:   .db"neo", 0
 cneo2:   .db"n", 0
@@ -43,43 +33,28 @@ commands:
     .dw c_,     help
     .dw cls,    help
     .dw chelp,  help
-    .dw ctest,  test
-    .dw cerror, error
     .dw clcd,   lcd
     .dw cin,    in
     .dw cout,   out
     .dw cfill,  fill
     .dw cread,  read
     .dw cread2,  read
-;    .dw cwrite, write
     .dw ccopy,  copy
     .dw cpwm,   fpwm
-    .dw cret,   fret
     .dw chl,    fhexload
     .dw chexload,fhexload
     .dw csp,    fsp
     .dw cclock, clock
     .dw clog,   log
-    .dw csf1,   stackframe
-    .dw csf2,   stackframe
     .dw cdump,  dump
     .dw cuptime,ctc_uptime
     .dw cruntime,ctc_runtime
-    .dw cdi,    fdi
-    .dw cei,    fei
     .dw cgo,    fgo
     .dw creset, freset
-    .dw ctrap,  trap
-    .dw cstrange,fstrange
     .dw crtest, ramtest
     .dw cneo,   neo
     .dw cneo2,  neo
     .db 0, 0
-
-error:
-    ld hl, err0 \ call sio_prstr_nl
-    ret
-err0: .db "Error is terror!",0
 
 help:
     ld hl, jshellname   \ call sio_prstr
@@ -89,31 +64,23 @@ help:
     ld hl, help0        \ call sio_prstr_nl
     ld hl, help1        \ call sio_prstr_nl
     ld hl, help2        \ call sio_prstr_nl
-    ld hl, help3        \ call sio_prstr_nl
-    ld hl, help4        \ call sio_prstr_nl
     ld hl, help5        \ call sio_prstr_nl
     ld hl, help6        \ call sio_prstr_nl
     ld hl, help7        \ call sio_prstr_nl
     ld hl, help8        \ call sio_prstr_nl
     ld hl, help9        \ call sio_prstr_nl
-;    ld hl, helpa        \ call sio_prstr_nl
     ld hl, helpb        \ call sio_prstr_nl
     ld hl, helpc        \ call sio_prstr_nl
-    ld hl, helpd        \ call sio_prstr_nl
     ld hl, helpe        \ call sio_prstr_nl
     ld hl, helpf        \ call sio_prstr_nl
     ld hl, helpg        \ call sio_prstr_nl
     ld hl, helph        \ call sio_prstr_nl
     ld hl, helpi        \ call sio_prstr_nl
-    ld hl, helpj        \ call sio_prstr_nl
     ld hl, helpk        \ call sio_prstr_nl
     ld hl, helpl        \ call sio_prstr_nl
     ld hl, helpl2       \ call sio_prstr_nl
-    ld hl, helpm        \ call sio_prstr_nl
     ld hl, helpn        \ call sio_prstr_nl
     ld hl, helpo        \ call sio_prstr_nl
-    ld hl, helpp        \ call sio_prstr_nl
-    ld hl, helpq        \ call sio_prstr_nl
     ld hl, helpv        \ call sio_prstr_nl
     ld hl, helpw        \ call sio_prstr_nl
     call neo_print_commands
@@ -121,8 +88,6 @@ help:
 help0: .db "Help function.", 0
 help1: .db " ", 0
 help2: .db "help, ls, ? - Display this help.", 0
-help3: .db "test - Run the test function.", 0
-help4: .db "error - Simple error notification.", 0
 help5: .db "lcd [0-3] <text> - Write to LCD screen.", 0
 help6: .db "in [0-FF] - Read input register.", 0
 help7: .db "out [0-FF] [0-FF] - Write output register.", 0
@@ -131,33 +96,22 @@ help9: .db "read, r [0-FFFF] [0-FFFF] - Read memory from len.", 0
 ;helpa: .db "write [0-ffff] [0-ff]: Write, location, value.", 0
 helpb: .db "copy [0-FFFF] [0-FFFF] [0-FFFF] - Copies from, to for length.", 0
 helpc: .db "pwm [on/off] turns the blinking animation on out0 on or off.", 0
-helpd: .db "ret - Returns from jshell (exit).", 0
 helpe: .db "hexload, hl - starts the hexloader. Overwrites stack.", 0
 helpf: .db "sp - print the current stack pointer value.", 0
 helpg: .db "clock - No parameters: Tell date and time. 6 parameters: Configure date and time: day month year hour minute second.", 0
 helph: .db "log [arguments] - No arguments: Show log file. Arguments: Add to log file.", 0
 helpi: .db "log init - Initialize the logfile.", 0
-helpj: .db "stackframe, sf - Experiment with stackframe technique(s).", 0
-helpk: .db "dump - Dump 0x000 to 0xF000 as intel hex.", 0
+helpk: .db "dump - Dump 0x000 to 0xFC00 as intel hex.", 0
 helpl: .db "uptime - Display uptime [s].", 0
 helpl2:.db "runtime [init]- Display cumulative runtime [s], init the runtime counter.", 0
-helpm: .db "di, ei - Disable interrupts, enable interrupts.", 0
 helpn: .db "go [0-FFFF] - run function at location.", 0
 helpo: .db "reset - Soft reset of processor.", 0
-helpp: .db "trap - Trigger the trap function.", 0
-helpq: .db "strange - where is the strange label?", 0
 helpv: .db "ramtest - Do the ramtest. Overwrites stack.", 0
 helpw: .db "neo, n [on/off, animation, 0x00-0xFF] - Change neopixel animation, set on, off, intensity. Animations:", 0
 
 ; A command gets argc in e and argv in hl
 
 ;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-fstrange:
-    ld hl, strange
-    call sio_uint16_hex_nl
-    ret
-
-;llllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll
 fgo:
     ld a, 4
     ld (main_cmd), a
@@ -177,19 +131,6 @@ freset:
     call sio_prstr_nl
     ret
 ;kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk
-fdi:
-    ld a, 2
-    ld (main_cmd), a
-    ld hl, lcd_ok_text
-    call sio_prstr_nl
-    ret
-fei:
-    ld a, 3
-    ld (main_cmd), a
-    ld hl, lcd_ok_text
-    call sio_prstr_nl
-    ret
-; yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy
 log:
     ld a, e         ; Hunt for "log" (no arguments)
     cp 1
@@ -386,11 +327,6 @@ hexloadcopy:
 spstr: .db "SP: ",0
 hlwarning: .db "Copying hexloader to stack (overwriting stack)",0
 
-; |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-fret:
-    ld a, 0
-    ld (run_enabled), a
-    ret
 ; 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 fpwm:
     inc hl
@@ -642,77 +578,6 @@ out_toofew:
     call sio_prstr_nl
     ret
 out_toofew_text: .db "Too few arguments, Please supply 2 arguments.", 0
-;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-; Test function: Test the arguments, display as list
-; A command gets argc in e and argv in hl
-test:
-    ld b, e
-
-    ld de, hl
-    ld hl, teststr
-    call sio_prstr
-    ld hl, de
-
-
-test_argument:
-    push hl
-    ld de, (hl)
-
-    ld hl, de
-    ;call sio_uint16_hex
-    call sio_prstr
-    ld hl, newlinestr
-    call sio_prstr
-    pop hl
-
-    inc hl
-    inc hl
-    djnz test_argument
-
-    ld hl, x
-    call hstoui16
-    ld hl, de
-    call sio_uint16_hex
-
-    ld hl, testbuf
-    ld a, 0x9
-    call ui4tohs
-    ld a, 0xA
-    call ui4tohs
-    ld a, 0x65
-    call ui8tohs
-    ld de, 0xDEAD
-    call ui16tohs
-    ld (hl), 0
-    ld hl, testbuf
-    call sio_prstr_nl
-
-    ld a, 0x25
-    call sio_uint8_hex
-    call bcdtoui8
-    call sio_uint8_hex_nl
-
-    ld de, 12345
-    call uint16tostr_buf
-    call sio_prstr_nl
-
-    ld hl, 54321
-    call sio_uint16_nl
-
-    ld a, 43
-    call sio_uint8_nl
-
-    ret
-
-teststr:
-    .db "Hello this is the test program.", 13, 10, 0
-newlinestr:
-    .db 13, 10, 0
-x:
-    .db "1234",0
-testbuf:
-    .block 20
 
 ; ----------------------------------------------------------------------------------------------
 ; LCD write function
