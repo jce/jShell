@@ -81,6 +81,47 @@ Div8NextBit:
   pop af
   ret
 
+; https://wikiti.brandonw.net/index.php?title=Z80_Routines:Math:Division
+; Div16 (16/16) Trashes b
+; HL = AC / DE (remainder in AC)
+div_ac_de:
+   ld	hl, 0
+   ld	b, 16
+_loop:
+   sll	c
+   rla
+   adc	hl, hl
+   sbc	hl, de
+   jr	nc, $+4
+   add	hl, de
+   dec	c
+   djnz	_loop
+   ret
+
+Div32By16:
+; IN:	ACIX=dividend, DE=divisor
+; OUT:	ACIX=quotient, DE=divisor, HL=remainder, B=0
+	ld	hl,0
+	ld	b,32
+Div32By16_Loop:
+	add	ix,ix
+	rl	c
+	rla
+	adc	hl,hl
+	jr	c,Div32By16_Overflow
+	sbc	hl,de
+	jr	nc,Div32By16_SetBit
+	add	hl,de
+	djnz	Div32By16_Loop
+	ret
+Div32By16_Overflow:
+	or	a
+	sbc	hl,de
+Div32By16_SetBit:
+	;.db	$DD,$2C		; inc ixl, change to inc ix to avoid undocumented
+    inc ix
+	djnz	Div32By16_Loop
+	ret
 
 Mul16:                           ; This routine performs the operation DEHL=BC*DE
   ld hl,0

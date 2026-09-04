@@ -136,7 +136,7 @@ unit_led_loop_entry:
     and e                   ; mask out the one led we are controlling
     or d                    ; Sets / not sets the one bit we control
     ld (leds), a            ; Store historic leds value
-    out 0, a                ; Write leds value to outputs
+    ;out 0, a                ; Write leds value to outputs
     ret
 
 unit_lpf:
@@ -145,9 +145,9 @@ unit_lpf:
 unit_neuron:
     ret
 
-unit_pll:
-    ret
+;unit_pll:
+;    ret
 
-
+#include "pll.asm"
 
 

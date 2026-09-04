@@ -4,3 +4,5 @@ deadbeef.hex
 beef
 *.swp
 conf.asm
+*.txt
+unit_init2.asm
