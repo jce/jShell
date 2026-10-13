@@ -1,7 +1,7 @@
 jshellname:
     .db 'jShell', 0
 jshellver:
-    .db '0.5.0', 0
+    .db '0.5.1', 0
 jshellprompt:
     .db ">", 0
 
@@ -43,6 +43,10 @@ cmac:  .db "mac",0
 cip:   .db "ip",0
 cmask: .db "mask", 0
 cgw:   .db "gw",0
+cspeed:.db "speed",0
+ccolor:.db "color",0
+calarm:.db "alarm",0
+
 
 commands:
     .dw c_,     help
@@ -83,6 +87,9 @@ commands:
     .dw cip,   wip
     .dw cmask, wmask
     .dw cgw,   wgw
+    .dw cspeed,wspeed
+    .dw ccolor,wcolor
+    .dw calarm,walarm
     .dw 0, 0
 
 error:
@@ -125,11 +132,14 @@ help:
     ld hl, helpq        \ call sio_prstr_nl
     ld hl, helpv        \ call sio_prstr_nl
     ld hl, helpw        \ call sio_prstr_nl
+    call neo_print_commands
     ld hl, helpw1       \ call sio_prstr_nl
     ld hl, helpw2       \ call sio_prstr_nl
     ld hl, helpw3       \ call sio_prstr_nl
     ld hl, helpw4       \ call sio_prstr_nl
-    call neo_print_commands
+    ld hl, helpw5       \ call sio_prstr_nl
+    ld hl, helpw6       \ call sio_prstr_nl
+    ld hl, helpw7       \ call sio_prstr_nl
     ret
 help0: .db "Help function.", 0
 help1: .db " ", 0
@@ -160,11 +170,14 @@ helpo: .db "reset - Soft reset of processor.", 0
 helpp: .db "trap - Trigger the trap function.", 0
 helpq: .db "strange - where is the strange label?", 0
 helpv: .db "ramtest - Do the ramtest. Overwrites stack.", 0
+helpw: .db "neo, n [on/off, animation, 0x00-0xFF] - Change neopixel animation, set on, off, intensity. Animations:", 0
 helpw1:.db "mac - [aa bb cc dd ee ff] get or view the w5500 MAC", 0
 helpw2:.db "ip - [a b c d] get or view the w5500 IP", 0
 helpw3:.db "mask - [a b c d] get or view the w5500 netmask", 0
 helpw4:.db "gw - [a b c d] get or view the w5500 gateway IP", 0
-helpw: .db "neo, n [on/off, animation, 0x00-0xFF] - Change neopixel animation, set on, off, intensity. Animations:", 0
+helpw5:.db "speed [0-255] - Set animation speed (during no UDP PLC connection)", 0
+helpw6:.db "color [0-255] - Set animation color (during no UDP PLC connection)", 0
+helpw7:.db "alarm [0-1] - Set animation to alarm mode (during no UDP PLC connection)", 0
 
 ; A command gets argc in e and argv in hl
 

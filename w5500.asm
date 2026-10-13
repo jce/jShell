@@ -30,6 +30,7 @@ wmac:
     hdigit loc_W5500_mac+3
     hdigit loc_W5500_mac+4
     hdigit loc_W5500_mac+5
+    call w5500_init
     jp w_ok
 
 wip:
@@ -40,6 +41,7 @@ wip:
     digit loc_W5500_ip+1
     digit loc_W5500_ip+2
     digit loc_W5500_ip+3
+    call w5500_init
     jp w_ok
 
 wmask:
@@ -50,6 +52,7 @@ wmask:
     digit loc_W5500_mask+1
     digit loc_W5500_mask+2
     digit loc_W5500_mask+3
+    call w5500_init
     jp w_ok
 
 wgw:
@@ -60,7 +63,32 @@ wgw:
     digit loc_W5500_gw+1
     digit loc_W5500_gw+2
     digit loc_W5500_gw+3
+    call w5500_init
     jp w_ok
+
+wspeed:
+    ld a, e
+    cp 2
+    jp nz, w_not_ok
+    digit speed
+    jp w_ok
+speed: .db 0
+
+wcolor:
+    ld a, e
+    cp 2
+    jp nz, w_not_ok
+    digit color
+    jp w_ok
+color: .db 0
+
+walarm:
+    ld a, e
+    cp 2
+    jp nz, w_not_ok
+    digit alarm
+    jp w_ok
+alarm: .db 0
 
 w_not_ok:
     ld hl, w_not_ok_str
@@ -68,7 +96,6 @@ w_not_ok:
     ret
 w_not_ok_str:   .db "Parameters not correct.",0
 w_ok:
-    call w5500_init
     ld hl, w_ok_str
     call sio_prstr_nl
     ret
