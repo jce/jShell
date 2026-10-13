@@ -1,7 +1,7 @@
 jshellname:
     .db 'jShell', 0
 jshellver:
-    .db '0.3.18', 0
+    .db '0.5.0', 0
 jshellprompt:
     .db ">", 0
 
@@ -15,30 +15,35 @@ cin:    .db "in", 0
 cout:   .db "out", 0
 cfill:  .db "fill", 0
 cread:  .db "read", 0
-cread2:  .db "r", 0
+cread2:  .db"r", 0
 ;cwrite:.db "write", 0
 ccopy:  .db "copy", 0
 cpwm:   .db "pwm", 0
 cret:   .db "ret", 0
 chl:    .db "hl", 0
-chexload:.db "hexload", 0
+chexload:.db"hexload", 0
 csp:    .db "sp", 0
 cclock: .db "clock", 0
 clog:   .db "log", 0
 csf1:   .db "sf", 0
 csf2:   .db "stackframe", 0
 cdump:  .db "dump", 0
-cuptime:.db"uptime", 0
+cuptime:.db "uptime", 0
 cruntime:.db"runtime", 0
-cdi:    .db"di", 0
-cei:    .db"ei", 0
-cgo:    .db"go", 0
-creset: .db"reset", 0
-ctrap:  .db"trap", 0
+cdi:    .db "di", 0
+cei:    .db "ei", 0
+cgo:    .db "go", 0
+creset: .db "reset", 0
+ctrap:  .db "trap", 0
 cstrange:.db"strange", 0
 crtest: .db"ramtest", 0
-cneo:   .db"neo", 0
-cneo2:   .db"n", 0
+cneo:   .db "neo", 0
+cneo2:  .db "n", 0
+cmac:  .db "mac",0
+cip:   .db "ip",0
+cmask: .db "mask", 0
+cgw:   .db "gw",0
+
 commands:
     .dw c_,     help
     .dw cls,    help
@@ -74,7 +79,11 @@ commands:
     .dw crtest, ramtest
     .dw cneo,   neo
     .dw cneo2,  neo
-    .db 0, 0
+    .dw cmac,  wmac
+    .dw cip,   wip
+    .dw cmask, wmask
+    .dw cgw,   wgw
+    .dw 0, 0
 
 error:
     ld hl, err0 \ call sio_prstr_nl
@@ -116,6 +125,10 @@ help:
     ld hl, helpq        \ call sio_prstr_nl
     ld hl, helpv        \ call sio_prstr_nl
     ld hl, helpw        \ call sio_prstr_nl
+    ld hl, helpw1       \ call sio_prstr_nl
+    ld hl, helpw2       \ call sio_prstr_nl
+    ld hl, helpw3       \ call sio_prstr_nl
+    ld hl, helpw4       \ call sio_prstr_nl
     call neo_print_commands
     ret
 help0: .db "Help function.", 0
@@ -147,6 +160,10 @@ helpo: .db "reset - Soft reset of processor.", 0
 helpp: .db "trap - Trigger the trap function.", 0
 helpq: .db "strange - where is the strange label?", 0
 helpv: .db "ramtest - Do the ramtest. Overwrites stack.", 0
+helpw1:.db "mac - [aa bb cc dd ee ff] get or view the w5500 MAC", 0
+helpw2:.db "ip - [a b c d] get or view the w5500 IP", 0
+helpw3:.db "mask - [a b c d] get or view the w5500 netmask", 0
+helpw4:.db "gw - [a b c d] get or view the w5500 gateway IP", 0
 helpw: .db "neo, n [on/off, animation, 0x00-0xFF] - Change neopixel animation, set on, off, intensity. Animations:", 0
 
 ; A command gets argc in e and argv in hl

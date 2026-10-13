@@ -31,7 +31,8 @@ proginit:
     call trap_init          ; Needs to be after SIO_A
     call jshell_init
     call neo_init
-    
+    call w5500_init   
+ 
     ld b, 13
     call sio_prchr
     ld b, 10
@@ -77,6 +78,7 @@ mainloop:
     call main_command
     push bc
     call neo_cyclic
+    call w5500_cyclic
     pop bc
 
     ld a, (run_enabled)
@@ -186,5 +188,6 @@ main_locbuf:    .db 0,0,0,0,0
 #include "trap.asm"
 #include "ramtest.asm"
 #include "neo.asm"
+#include "w5500.asm"
 end:
 .END

@@ -1,3 +1,5 @@
+0.5.0
+- Stores network parameters for W5500: mac, ip, mask, gw.
 0.3.16
 - bugfix
 - static rainbows: rb, rb2

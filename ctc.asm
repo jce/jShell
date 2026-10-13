@@ -19,7 +19,7 @@ ctc_runtime:
     ret
 
 ctc_runtime_init:
-    ld hl, log_location_c - 4
+    ld hl, loc_runtime
     ld (hl), 0 \ inc hl
     ld (hl), 0 \ inc hl
     ld (hl), 0 \ inc hl
@@ -28,7 +28,7 @@ ctc_runtime_init:
 
 ctc_runtime_display:
     sfo 20
-    ld de, log_location_c - 4
+    ld de, loc_runtime
     push ix
     pop hl
     call uint32tostr_dec
@@ -75,7 +75,7 @@ ctc_isr1:
     ld (ctc_s_flag), a    
     ld ix, ctc_s_counter
     call ctc_increment
-    ld ix, log_location_c - 4
+    ld ix, loc_runtime
     call ctc_increment
 ctc_isr1_end:
     pop ix
