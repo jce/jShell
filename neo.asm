@@ -18,6 +18,7 @@ neopixel_commands:
     .dw 0x000C, s_rainbow,  neo_paint_rainbow
     .dw 0x000D, s_rb2,      neo_paint_rainbow2
     .dw 0x000E, s_rodo,     neo_paint_rodo
+    .dw 0x000F, s_drodo,    neo_paint_drodo
     .dw 0x0000
 
 s_clock:    .db "clock",0
@@ -34,6 +35,7 @@ s_rrod:     .db "rrod",0
 s_rainbow:  .db "rb",0
 s_rb2:      .db "rb2",0
 s_rodo:     .db "rodo",0
+s_drodo:    .db "drodo",0
 
 neo_mode:       .db     0x80 + 0x0E
 neo_bright:     .db     0x10
@@ -178,6 +180,7 @@ neo_grb_scale_brightness
     ld d, 0
     ld a, (neo_bright)  
 neo_grb_scale_brightness_loop:
+    inc ix
     ld e, (ix)
     call Mul8           ;   HL = DE * A    
     ld (ix), h
@@ -271,25 +274,30 @@ neo_grb_pixel_loop:
     sub a, 60
     jr neo_grb_pixel_loop
 neo_grb_add_continue:
-    ; The index is 3 times the cell number (grb)
-    ld d, a
-    add a, d
-    add a, d
-    ; color offset
-    add a, b
-    ; calculate cell index
-    ld hl, neo_grb
-    ld d, c
-    ld b, 0
-    ld c, a
-    add hl, bc
-    ; load cell value
+    ; The index is 6*pixel + 2*channel
+    ld e, a
+    ld d, 0     ; de = pixel nr
+    ld hl, de
+    add hl, hl  ; 2*pixel
+    add hl, hl  ; 4*pixel
+    add hl, de  ; 5*pixel  
+    add hl, de  ; 6*pixel
+    ; 2*channel
+    ld a, b
+    add a, a
+    ld e, a
+    ld d, 0
+    add hl, de  ; 6*pixel + 2*channel
+
+    ld de, neo_grb    ; Array base
+    add hl, de
+    inc hl      ; Target the high byte
+    ; Deposit in high byte
     ld a, (hl)
-    ; store increased value
-    add a, d
-    jr nc, neo_grb_nocarry
+    add a, c
+    jr nc, neo_grb_no_carry
     ld a, 0xff
-neo_grb_nocarry:
+neo_grb_no_carry:
     ld (hl), a
     pop hl
     pop de
@@ -297,13 +305,28 @@ neo_grb_nocarry:
     pop af
     ret
 
+neo_grb_pixel3:
+; Input: a - Pixel number
+; Input: (global) - neo_col_r/g/b
+; Output: (global) neo_grb block changes
+; Adds the color value
+
 ; Clears the grb buffer
 neo_clear_grb:
-    ld b, 60*3
+    push bc
+    push hl
+    push af
+    ld bc, 60*3*2
     ld hl, neo_grb
 neo_clear_loop:
     ld (hl), 0x00 \ inc hl
-    djnz neo_clear_loop
+    dec bc
+    ld a, b
+    or c
+    jr nz, neo_clear_loop
+    pop af
+    pop hl
+    pop bc
     ret
 
 ; Translate the grb buffer to command buffer    
@@ -313,7 +336,7 @@ neo_grb_to_cmd:
     ld c, 60 * 3
 neo_grb_to_cmd_loop:
     ld b, 8
-    ld a, (ix) \ inc ix
+    inc ix \ ld a, (ix) \ inc ix
 neo_grb_to_cmd_byte:
     sla a
     jr c, neo_grb_to_cmd_bit_true
@@ -328,7 +351,7 @@ neo_grb_to_cmd_bit_end:
     ret
 
 neo_grb:             ; Neo color buffer. Green, Red, Blue
-    .block 3*60     ; 3 bytes * 60 leds
+    .block 3*2*60     ; 3 words * 60 leds
 
 ; Runs the commands in the commandbuffer
 neo_command_run:

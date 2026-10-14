@@ -1,3 +1,6 @@
+0.5.2
+- Migratie van 8bits grb buffer naar 16bits grb buffer
+- Added "drodo" animation, domotic rotating dot. Domotic link not working yet.
 0.5.1
 - Separation for the W5500 communication and animation parameters: speed, color, alarm.
 0.5.0

@@ -1,7 +1,7 @@
 jshellname:
     .db 'jShell', 0
 jshellver:
-    .db '0.5.1', 0
+    .db '0.5.2', 0
 jshellprompt:
     .db ">", 0
 
@@ -171,10 +171,10 @@ helpp: .db "trap - Trigger the trap function.", 0
 helpq: .db "strange - where is the strange label?", 0
 helpv: .db "ramtest - Do the ramtest. Overwrites stack.", 0
 helpw: .db "neo, n [on/off, animation, 0x00-0xFF] - Change neopixel animation, set on, off, intensity. Animations:", 0
-helpw1:.db "mac - [aa bb cc dd ee ff] get or view the w5500 MAC", 0
-helpw2:.db "ip - [a b c d] get or view the w5500 IP", 0
-helpw3:.db "mask - [a b c d] get or view the w5500 netmask", 0
-helpw4:.db "gw - [a b c d] get or view the w5500 gateway IP", 0
+helpw1:.db "mac aa bb cc dd ee ff - set the w5500 MAC", 0
+helpw2:.db "ip a b c d - set the w5500 IP", 0
+helpw3:.db "mask a b c d - set the w5500 netmask", 0
+helpw4:.db "gw a b c d - set the w5500 gateway IP", 0
 helpw5:.db "speed [0-255] - Set animation speed (during no UDP PLC connection)", 0
 helpw6:.db "color [0-255] - Set animation color (during no UDP PLC connection)", 0
 helpw7:.db "alarm [0-1] - Set animation to alarm mode (during no UDP PLC connection)", 0

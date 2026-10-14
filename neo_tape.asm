@@ -71,11 +71,11 @@ neo_paint_tape2:
     ld a, (neo_tape2_pos) \ add  256*29/30 \ call act \ call dim \ ld c, a \ ld b, 3 \ ld a, 29\ call neo_grb_pixel  
 
     ld ix, neo_grb
-    ld iy, neo_grb+30*3
+    ld iy, neo_grb+30*6
     ld b, 30*3
 grb_copy_loop2:
-    ld a, (ix) \ inc ix
-    ld (iy), a \ inc iy
+    inc ix \ ld a, (ix) \ inc ix
+    inc iy \ ld (iy), a \ inc iy
     djnz grb_copy_loop2    
     ret;
 
@@ -160,11 +160,11 @@ neo_paint_tape3:
     ld a, (neo_tape2_pos) \ add  256*19/20 \ call act \ call dim \ ld c, a \ ld b, 3 \ ld a, 19\ call neo_grb_pixel  
 
     ld ix, neo_grb
-    ld iy, neo_grb+20*3
+    ld iy, neo_grb+20*6
     ld b, 40*3
 grb_copy_loop3:
-    ld a, (ix) \ inc ix
-    ld (iy), a \ inc iy
+    inc ix \ ld a, (ix) \ inc ix
+    inc iy \ ld (iy), a \ inc iy
     djnz grb_copy_loop3    
     ret;
 
@@ -190,11 +190,11 @@ neo_paint_tape4:
     ld a, (neo_tape2_pos) \ add  256*14/15 \ call act \ call dim \ ld c, a \ ld b, 3 \ ld a, 14\ call neo_grb_pixel  
 
     ld ix, neo_grb
-    ld iy, neo_grb+15*3
+    ld iy, neo_grb+15*6
     ld b, 45*3
 grb_copy_loop4:
-    ld a, (ix) \ inc ix
-    ld (iy), a \ inc iy
+    inc ix \ ld a, (ix) \ inc ix
+    inc iy \ ld (iy), a \ inc iy
     djnz grb_copy_loop4    
     ret;
 
@@ -217,11 +217,11 @@ neo_paint_tape5:
     ld a, (neo_tape2_pos) \ add  256*11/12 \ call act \ call dim \ ld c, a \ ld b, 3 \ ld a, 11\ call neo_grb_pixel  
 
     ld ix, neo_grb
-    ld iy, neo_grb+12*3
+    ld iy, neo_grb+12*6
     ld b, 48*3
 grb_copy_loop5:
-    ld a, (ix) \ inc ix
-    ld (iy), a \ inc iy
+    inc ix \ ld a, (ix) \ inc ix
+    inc iy \ ld (iy), a \ inc iy
     djnz grb_copy_loop5   
     ret;
 
@@ -242,11 +242,11 @@ neo_paint_tape6:
     ld a, (neo_tape2_pos) \ add  256*9 /10 \ call act \ call dim \ ld c, a \ ld b, 3 \ ld a, 9 \ call neo_grb_pixel  
 
     ld ix, neo_grb
-    ld iy, neo_grb+10*3
+    ld iy, neo_grb+10*6
     ld b, 50*3
 grb_copy_loop6:
-    ld a, (ix) \ inc ix
-    ld (iy), a \ inc iy
+    inc ix \ ld a, (ix) \ inc ix
+    inc iy \ ld (iy), a \ inc iy
     djnz grb_copy_loop6   
     ret;
 

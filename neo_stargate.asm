@@ -14,11 +14,11 @@ neo_paint_sg:
     ld a, (sg_pos) \ add 256/6*5 \ call sin \ call dim \ ld c, a \ ld b, 0 \ ld a, 5 \ call neo_grb_pixel
 
     ld ix, neo_grb
-    ld iy, neo_grb+6*3
+    ld iy, neo_grb+6*6
     ld b, 54*3
 grb_copy_loop:
-    ld a, (ix) \ inc ix
-    ld (iy), a \ inc iy
+    inc ix \ ld a, (ix) \ inc ix
+    inc iy \ ld (iy), a \ inc iy
     djnz grb_copy_loop     
     ret
 

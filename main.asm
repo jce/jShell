@@ -189,5 +189,6 @@ main_locbuf:    .db 0,0,0,0,0
 #include "ramtest.asm"
 #include "neo.asm"
 #include "w5500.asm"
+#include "neo_drodo.asm"
 end:
 .END
