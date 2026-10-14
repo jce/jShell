@@ -72,7 +72,7 @@ wspeed:
     jp nz, w_not_ok
     digit speed
     jp w_ok
-speed: .db 0
+speed: .db 0x80
 
 wcolor:
     ld a, e
@@ -80,7 +80,7 @@ wcolor:
     jp nz, w_not_ok
     digit color
     jp w_ok
-color: .db 0
+color: .db 0x80
 
 walarm:
     ld a, e

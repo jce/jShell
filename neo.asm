@@ -37,7 +37,7 @@ s_rb2:      .db "rb2",0
 s_rodo:     .db "rodo",0
 s_drodo:    .db "drodo",0
 
-neo_mode:       .db     0x80 + 0x0E
+neo_mode:       .db     0x80 + 0x0F
 neo_bright:     .db     0x10
 
 ; A command gets argc in e and argv in hl
@@ -305,11 +305,61 @@ neo_grb_no_carry:
     pop af
     ret
 
-neo_grb_pixel3:
+neo_grb_pixel16:
 ; Input: a - Pixel number
-; Input: (global) - neo_col_r/g/b
+; Input: (global) - neo_col_g/r/b
 ; Output: (global) neo_grb block changes
 ; Adds the color value
+
+    ; Wrap around the 60
+neo_grb_pixel16_loop:
+    cp 60           
+    jr c, neo_grb_pixel16_continue
+    sub a, 60
+    jr neo_grb_pixel16_loop
+
+    ; Calculate 6*pixel, offset in neo_grb
+neo_grb_pixel16_continue
+    ld e, a
+    ld d, 0     ; de = pixel nr
+    ld hl, de
+    add hl, de  ; 2*pixel
+    add hl, de  ; 3*pixel
+    add hl, hl  ; 6*pixel  
+    ld de, hl
+    ld hl, neo_grb
+    add hl, de  ; (hl) is now the record value in neo_grb [g][g][r][r][b][b]
+
+    push hl         ; Green
+    ld bc, (hl)         ; bc is inhoud van hl, [g][g]
+    ld de, (neo_col_g)  ; de is inhoud van neo_col_g
+    ld hl, bc           ; hl wordt [g][g]
+    add hl, de          ; [g][g] + nel_col_g
+    ld bc, hl           ; bc becomes the sum
+    pop hl              ; Remember hl, the address of [g][g]
+    ld (hl), bc         ; Store bc at [g][g]
+
+    inc hl \ inc hl 
+    push hl         ; Red
+    ld bc, (hl)
+    ld de, (neo_col_r)
+    ld hl, bc
+    add hl, de
+    ld bc, hl
+    pop hl
+    ld (hl), bc
+
+    inc hl \ inc hl
+    push hl         ; Blue
+    ld bc, (hl)
+    ld de, (neo_col_b)
+    ld hl, bc
+    add hl, de
+    ld bc, hl
+    pop hl
+    ld (hl), bc
+
+    ret
 
 ; Clears the grb buffer
 neo_clear_grb:
@@ -336,7 +386,12 @@ neo_grb_to_cmd:
     ld c, 60 * 3
 neo_grb_to_cmd_loop:
     ld b, 8
-    inc ix \ ld a, (ix) \ inc ix
+    ld a, (ix)          ; Low fraction
+    add a, 0x80         ; >= 0x80? Carry on
+    inc ix              ; 
+    ld a, (ix)          ; High byte
+    adc a, 0            ; + carry (rounded value)
+    inc ix
 neo_grb_to_cmd_byte:
     sla a
     jr c, neo_grb_to_cmd_bit_true

@@ -4,17 +4,19 @@ neo_paint_drodo:
     call calc_dt
     call neo_drodo_calc_shift
     call neo_drodo_calc_pos
+    call neo_drodo_calc_color
+    call neo_drodo_scale_brightness
     ld a, (neo_bright) \ ld c, a \ srl c \ srl c
 
-    ld a, (neo_drodo_pos) \ add a,0 \ srl a \ srl a \ ld b, 3 \ call neo_grb_pixel  
-    ld a, (neo_drodo_pos) \ add a,1 \ srl a \ srl a \ ld b, 3 \ call neo_grb_pixel  
-    ld a, (neo_drodo_pos) \ add a,2 \ srl a \ srl a \ ld b, 3 \ call neo_grb_pixel  
-    ld a, (neo_drodo_pos) \ add a,3 \ srl a \ srl a \ ld b, 3 \ call neo_grb_pixel  
-    ld a, (neo_drodo_pos) \ add a,4 \ srl a \ srl a \ ld b, 3 \ call neo_grb_pixel  
-    ld a, (neo_drodo_pos) \ add a,5 \ srl a \ srl a \ ld b, 3 \ call neo_grb_pixel  
-    ld a, (neo_drodo_pos) \ add a,6 \ srl a \ srl a \ ld b, 3 \ call neo_grb_pixel  
-    ld a, (neo_drodo_pos) \ add a,7 \ srl a \ srl a \ ld b, 3 \ call neo_grb_pixel  
-    ld a, (neo_drodo_pos) \ add a,8 \ srl a \ srl a \ ld b, 3 \ call neo_grb_pixel  
+    ld a, (neo_drodo_pos) \ add a,0 \ srl a \ srl a \ call neo_grb_pixel16  
+    ld a, (neo_drodo_pos) \ add a,1 \ srl a \ srl a \ call neo_grb_pixel16  
+    ld a, (neo_drodo_pos) \ add a,2 \ srl a \ srl a \ call neo_grb_pixel16 
+    ld a, (neo_drodo_pos) \ add a,3 \ srl a \ srl a \ call neo_grb_pixel16  
+    ld a, (neo_drodo_pos) \ add a,4 \ srl a \ srl a \ call neo_grb_pixel16  
+    ld a, (neo_drodo_pos) \ add a,5 \ srl a \ srl a \ call neo_grb_pixel16  
+    ld a, (neo_drodo_pos) \ add a,6 \ srl a \ srl a \ call neo_grb_pixel16  
+    ld a, (neo_drodo_pos) \ add a,7 \ srl a \ srl a \ call neo_grb_pixel16  
+    ld a, (neo_drodo_pos) \ add a,8 \ srl a \ srl a \ call neo_grb_pixel16  
 
     ret;
 
@@ -112,6 +114,6 @@ neo_drodo_scale_brightness:
 neo_drodo_shift:.dw 0   ; Shift of rotating dot, dt * speed
 neo_drodo_pos:  .db 0   ; Position on profile
 neo_drodo_posw: .dw 0   ; Position on profile, word sized
-neo_col_g:      .dw 0   ; Green
+neo_col_g:      .dw 255 ; Green
 neo_col_r:      .dw 0   ; Red
 neo_col_b:      .dw 0   ; Blue
