@@ -18,6 +18,7 @@ neopixel_commands:
     .dw 0x000C, s_rainbow,  neo_paint_rainbow
     .dw 0x000D, s_rb2,      neo_paint_rainbow2
     .dw 0x000E, s_rodo,     neo_paint_rodo
+    .dw 0x000F, s_drodo,    neo_paint_drodo
     .dw 0x0000
 
 s_clock:    .db "clock",0
@@ -34,9 +35,10 @@ s_rrod:     .db "rrod",0
 s_rainbow:  .db "rb",0
 s_rb2:      .db "rb2",0
 s_rodo:     .db "rodo",0
+s_drodo:    .db "drodo",0
 
-neo_mode:       .db     0x80 + 0x0E
-neo_bright:     .db     0x10
+neo_mode:       .db     0x80 + 0x0F
+neo_bright:     .db     0x04
 
 ; A command gets argc in e and argv in hl
 neo:
@@ -168,6 +170,7 @@ neo_print_commands_loop:
 .include "neo_rrod.asm"
 .include "neo_rainbow.asm"
 .include "neo_rodo.asm"
+.include "neo_drodo.asm"
 ;------------------------------------------------------------------------------------------------------
 
 ; Scale every color of every pixel according to neo_bright
@@ -295,6 +298,51 @@ neo_grb_nocarry:
     pop de
     pop bc
     pop af
+    ret
+
+neo_grb_pixel3:
+; Input: a - Pixel number
+; Input: (global) - neo_col_g/r/b
+; Output: (global) neo_grb block changes
+; Adds the color values
+
+    ; Wrap around the 60
+neo_grb_pixel3_loop:
+    cp 60           
+    jr c, neo_grb_pixel3_continue
+    sub a, 60
+    jr neo_grb_pixel3_loop
+neo_grb_pixel3_continue:
+
+    ; Calculate 3*pixel, offset in neo_grb
+    ld b, a
+    add a, b
+    add a, b
+    ld hl, neo_grb
+    ld d, 0
+    ld e, a
+    add hl, de          ; (hl) is now the record value in neo_grb [g][r][b]
+
+    ; Green
+    ld b, (hl)          ; bc is inhoud van hl, [g]
+    ld a, (neo_col_g)   ; de is inhoud van neo_col_g
+    add a, b            ; a = [g] + neo_col_g
+    ld (hl), a          ; Store a at [g][g]
+
+    ; Red
+    inc hl 
+    ld b, (hl)          ; bc is inhoud van hl, [r]
+    ld a, (neo_col_r)   ; de is inhoud van neo_col_g
+    add a, b            ; a = [r] + neo_col_g
+    ld (hl), a          ; Store a at [r]
+
+    ; Blue
+    inc hl 
+    ld b, (hl)          ; bc is inhoud van hl, [b]
+    ld a, (neo_col_b)   ; de is inhoud van neo_col_g
+    add a, b            ; a = [b] + neo_col_g
+    ld (hl), a          ; Store a at [b]
+
     ret
 
 ; Clears the grb buffer

@@ -1,7 +1,7 @@
 jshellname:
     .db 'jShell', 0
 jshellver:
-    .db '0.5.1', 0
+    .db '0.5.4', 0
 jshellprompt:
     .db ">", 0
 

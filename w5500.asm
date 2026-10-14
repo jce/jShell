@@ -72,7 +72,6 @@ wspeed:
     jp nz, w_not_ok
     digit speed
     jp w_ok
-speed: .db 0
 
 wcolor:
     ld a, e
@@ -80,7 +79,6 @@ wcolor:
     jp nz, w_not_ok
     digit color
     jp w_ok
-color: .db 0
 
 walarm:
     ld a, e
@@ -88,7 +86,6 @@ walarm:
     jp nz, w_not_ok
     digit alarm
     jp w_ok
-alarm: .db 0
 
 w_not_ok:
     ld hl, w_not_ok_str
@@ -100,6 +97,9 @@ w_ok:
     call sio_prstr_nl
     ret
 w_ok_str:   .db "OK.",0
+speed: .db 10
+color: .db 0x80
+alarm: .db 0
 ;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 w5500_init:
