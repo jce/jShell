@@ -1,3 +1,5 @@
+0.5.5
+- dt2 animation added (domotic tapereel 2-spoke). Stubs for dt3-6.
 0.5.4
 - drodo animation added (domotic rotating dot)
 0.5.1

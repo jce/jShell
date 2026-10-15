@@ -1,12 +1,37 @@
+
+; Alarm display for domotics. Draws an on/off blinking circle filled with red.
+neo_paint_d_alarm:
+    ld a, (ctc_ms_counter)
+    cp 50
+    jr nc, alarm_dark   ; Dark for 50-99 [10ms]
+
+    ld a, 0             ; Prepare the colors, just red
+    ld (neo_col_g), a
+    ld (neo_col_b), a
+    ld a, (neo_bright)
+    ld (neo_col_r), a
+
+    ld b, 60            ; 60 is allowed for pixel3 wraps around 60
+alarm_loop:
+    ld a, b
+    call neo_grb_pixel3
+    djnz alarm_loop
+    
+alarm_dark: ; Nothing needs to be done for a dark alarm
+    ret
+
 ; Rotating dot (rodo) animation. Divides the circle in 240 points, each 4 points are for one LED.
 ; Deposits some activation in some points, logic is per point instead of per LED.
 neo_paint_drodo:
+    ld a, (alarm)
+    or a
+    jr nz, neo_paint_d_alarm
+
     call calc_dt
     call neo_drodo_calc_shift
     call neo_drodo_calc_pos
     call neo_drodo_calc_color
     call neo_drodo_scale_brightness
-    ld a, (neo_bright) \ ld c, a \ srl c \ srl c
 
     ld a, (neo_drodo_pos) \ add a,0 \ srl a \ srl a \ call neo_grb_pixel3 
     ld a, (neo_drodo_pos) \ add a,1 \ srl a \ srl a \ call neo_grb_pixel3
@@ -18,7 +43,9 @@ neo_paint_drodo:
     ld a, (neo_drodo_pos) \ add a,7 \ srl a \ srl a \ call neo_grb_pixel3
     ld a, (neo_drodo_pos) \ add a,8 \ srl a \ srl a \ call neo_grb_pixel3
 
-    ret;
+    ret
+
+    
 
 neo_drodo_calc_pos:
     ld de, (neo_drodo_shift)

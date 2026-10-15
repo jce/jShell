@@ -60,15 +60,15 @@ ctc_isr1:
     push af
     push ix
 
-    ld a, (ctc_ms_coun_ff)
+    ld a, (ctc_ms_coun_ff)  ; MS counter [0-0xFF]
     inc a
     ld (ctc_ms_coun_ff), a
 
-    ld a, (ctc_ms_counter)
-    inc a
-    cp a, 100
-    ld (ctc_ms_counter), a
-    jp nz, ctc_isr1_end
+    ld a, (ctc_ms_counter)  ; MS counter [0-99]
+    inc a                   ; 
+    cp a, 100               ; a >= 100?
+    ld (ctc_ms_counter), a  ; Store a
+    jp nz, ctc_isr1_end     
     ld a, 0
     ld (ctc_ms_counter), a
     ld a, 1
@@ -142,4 +142,3 @@ ctc_ms_counter: .db 0   ; Counts ms 0 to 99
 ctc_ms_coun_ff: .db 0   ; Counts ms 0 to 0xff
 ctc_s_counter:  .dw 0,0 ; Counts uptime [s]
 ctc_s_flag:     .db 0   ; Set every second
-;ctc_u_counter:  .dw 0,0 ; Counts runtime [s]

@@ -19,6 +19,11 @@ neopixel_commands:
     .dw 0x000D, s_rb2,      neo_paint_rainbow2
     .dw 0x000E, s_rodo,     neo_paint_rodo
     .dw 0x000F, s_drodo,    neo_paint_drodo
+    .dw 0x0010, s_dtape2,   neo_paint_dtape2
+    .dw 0x0011, s_dtape3,   neo_paint_dtape3
+    .dw 0x0012, s_dtape4,   neo_paint_dtape4
+    .dw 0x0013, s_dtape5,   neo_paint_dtape5
+    .dw 0x0014, s_dtape6,   neo_paint_dtape6
     .dw 0x0000
 
 s_clock:    .db "clock",0
@@ -36,6 +41,11 @@ s_rainbow:  .db "rb",0
 s_rb2:      .db "rb2",0
 s_rodo:     .db "rodo",0
 s_drodo:    .db "drodo",0
+s_dtape2:   .db "dt2",0
+s_dtape3:   .db "dt3",0
+s_dtape4:   .db "dt4",0
+s_dtape5:   .db "dt5",0
+s_dtape6:   .db "dt6",0
 
 neo_mode:       .db     0x80 + 0x0F
 neo_bright:     .db     0x04
@@ -171,6 +181,7 @@ neo_print_commands_loop:
 .include "neo_rainbow.asm"
 .include "neo_rodo.asm"
 .include "neo_drodo.asm"
+.include "neo_dtape.asm"
 ;------------------------------------------------------------------------------------------------------
 
 ; Scale every color of every pixel according to neo_bright
@@ -306,6 +317,11 @@ neo_grb_pixel3:
 ; Output: (global) neo_grb block changes
 ; Adds the color values
 
+    push af
+    push bc
+    push de
+    push hl
+
     ; Wrap around the 60
 neo_grb_pixel3_loop:
     cp 60           
@@ -342,6 +358,11 @@ neo_grb_pixel3_continue:
     ld a, (neo_col_b)   ; de is inhoud van neo_col_g
     add a, b            ; a = [b] + neo_col_g
     ld (hl), a          ; Store a at [b]
+
+    pop hl
+    pop de
+    pop bc
+    pop af
 
     ret
 
