@@ -1,3 +1,6 @@
+0.5.6
+- dt2 now rotates the right way (for a tape recorder reel).
+- dt3, 4, 5, 6 implemented via macro.
 0.5.5
 - dt2 animation added (domotic tapereel 2-spoke). Stubs for dt3-6.
 0.5.4

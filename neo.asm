@@ -47,7 +47,7 @@ s_dtape4:   .db "dt4",0
 s_dtape5:   .db "dt5",0
 s_dtape6:   .db "dt6",0
 
-neo_mode:       .db     0x80 + 0x0F
+neo_mode:       .db     0x80 + 0x11
 neo_bright:     .db     0x04
 
 ; A command gets argc in e and argv in hl

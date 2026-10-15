@@ -9,6 +9,7 @@ neo_paint_d_alarm:
     ld (neo_col_g), a
     ld (neo_col_b), a
     ld a, (neo_bright)
+    sla a \ sla a
     ld (neo_col_r), a
 
     ld b, 60            ; 60 is allowed for pixel3 wraps around 60
