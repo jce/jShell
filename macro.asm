@@ -10,6 +10,70 @@ dbg .macro $int
     pop af
     .endm
 
+; Another semi debug macro, print a ascii line.
+print .macro $msg
+    .local
+    jr skip
+str: db $msg , 0
+skip:
+    push hl
+    ld hl, str
+    call sio_prstr_nl
+    pop hl
+    .endlocal
+    .endm
+
+; And print hl with description.
+printhl .macro $msg
+    .local
+    jr skip
+str: db $msg , 0
+skip:
+    push hl
+    push hl
+    push af
+    push bc
+    ld hl, str
+    call sio_prstr
+    ld a, ' '
+    ld b, a
+    call sio_prchr
+    pop bc
+    pop af
+    pop hl
+    call sio_uint16
+    ld hl, sio_newline
+    call sio_prstr
+    pop hl
+    .endlocal
+    .endm
+    
+; And print hl with description.
+printa .macro $msg
+    .local
+    jr skip
+str: db $msg , 0
+skip:
+    push hl
+    push hl
+    push af
+    push bc
+    ld hl, str
+    call sio_prstr
+    ld a, ' '
+    ld b, a
+    call sio_prchr
+    pop bc
+    pop af
+    pop hl
+    call sio_uint8
+    ld hl, sio_newline
+    call sio_prstr
+    pop hl
+    .endlocal
+    .endm
+
+
 ; Stack frame open macro
 ; Takes 6 bytes of stack in addition to $size
 ; uses ix as frame pointer
