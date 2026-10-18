@@ -33,11 +33,13 @@ skip:
     push hl
     push af
     push bc
+    push de
     ld hl, str
     call sio_prstr
     ld a, ' '
     ld b, a
     call sio_prchr
+    pop de
     pop bc
     pop af
     pop hl
@@ -58,11 +60,13 @@ skip:
     push hl
     push af
     push bc
+    push de
     ld hl, str
     call sio_prstr
     ld a, ' '
     ld b, a
     call sio_prchr
+    pop de
     pop bc
     pop af
     pop hl

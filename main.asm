@@ -38,6 +38,8 @@ proginit:
     ld b, 10
     call sio_prchr
 strange:
+    ld a, 0
+    call lcd_goto_line
     ld hl, jshellname
     call lcd_write_string
     ld b, ' '

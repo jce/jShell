@@ -35,25 +35,38 @@ lcd_clear_line_loop:
     pop af
     ret
 
+lcd_goto_line:
 ; goto function in LCD line number
 ; a - line number
-lcd_goto_line:
+    push bc
+    ld b, 0
+    call lcd_goto_line_offset
+    pop bc
+    ret
+
+; a - line number
+; b - offset
+lcd_goto_line_offset:
     cp 0 \ jr z, lcd_goto_line_0
     cp 1 \ jr z, lcd_goto_line_1
     cp 2 \ jr z, lcd_goto_line_2
     ld a, 0x54
+    add b
     call lcd_goto_ddram
     ret
 lcd_goto_line_0:
     ld a, 0x00
+    add b
     call lcd_goto_ddram
     ret
 lcd_goto_line_1:
     ld a, 0x40
+    add b
     call lcd_goto_ddram
     ret
 lcd_goto_line_2:
     ld a, 0x14
+    add b
     call lcd_goto_ddram
     ret
     

@@ -159,4 +159,169 @@ inloop:
     ret
 
 
+;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+; More Zeda, needed is a fixed-width-string from uint16, that displays a decimal dot on
+; a fixed length canvas. Modified these:
+; https://github.com/Zeda/Z80-Optimized-Routines/blob/master/conversion/u16toa_destructive.z80
+; Since the result is ugly, i take full blame. JCE, 18-10-2026
+
+;written by Zeda
+;Converts a 16-bit unsigned integer to an ASCII string.
+;Note that this version destroys registers.
+
+u16toa_d_buf   .block  7
+
+u16toa_d1:
+;Input:
+;   DE is the number to convert
+;Output:
+;   HL points to the null-terminated ASCII string
+;Destroys:
+;   BC, DE, AF
+  ld hl, u16toa_d_buf
+  ex de,hl
+
+; First digit
+  ld bc,-10000
+  ld a,'0'-1
+  inc a     ;\
+  add hl,bc ; | Loop
+  jr c,$-2  ;/
+  ld (de),a
+  inc de
+
+; Second digit
+  ld bc,1000
+  ld a,'9'+1
+  dec a     ;\
+  add hl,bc ; | Loop
+  jr nc,$-2 ;/
+  ld (de),a
+  inc de
+
+; Third digit
+  ld bc,-100
+  ld a,'0'-1
+  inc a     ;\
+  add hl,bc ; | Loop
+  jr c,$-2  ;/
+  ld (de),a
+  inc de
+
+; Fourth digit, remainder is fifth digit
+  ld a,l
+  ld h,'9'+1
+  dec h     ;\
+  add a,10  ; | Loop
+  jr nc,$-3 ;/
+  ex de,hl
+  ld (hl),d
+  inc hl
+
+    ld c, a
+    ld a, '.'
+    ld (hl), a
+    inc hl
+    ld a, c
+
+  add a,'0'
+  ld (hl),a
+  inc hl
+  ld (hl),0
+
+;Now strip the leading zeros
+  ld c,-6
+  add hl,bc         ; hl is at the begin of buf
+  ld a,'0'
+    jr zl1
+zl2:
+    ld (hl), ' '    
+    inc hl
+zl1:
+  cp (hl) 
+  jr z,zl2          
+
+  ld hl, u16toa_d_buf
+  ret
+
+u16toa_d2:
+;Input:
+;   DE is the number to convert
+;Output:
+;   HL points to the null-terminated ASCII string
+;Destroys:
+;   BC, DE, AF
+  ld hl, u16toa_d_buf
+  ex de,hl
+
+; First digit
+  ld bc,-10000
+  ld a,'0'-1
+  inc a     ;\
+  add hl,bc ; | Loop
+  jr c,$-2  ;/
+  ld (de),a
+  inc de
+
+; Second digit
+  ld bc,1000
+  ld a,'9'+1
+  dec a     ;\
+  add hl,bc ; | Loop
+  jr nc,$-2 ;/
+  ld (de),a
+  inc de
+
+; Third digit
+  ld bc,-100
+  ld a,'0'-1
+  inc a     ;\
+  add hl,bc ; | Loop
+  jr c,$-2  ;/
+  ld (de),a
+  inc de
+
+    ld c, a
+    ld a, '.'
+    ld (de), a
+    inc de
+    ld a, c
+
+; Fourth digit, remainder is fifth digit
+  ld a,l
+  ld h,'9'+1
+  dec h     ;\
+  add a,10  ; | Loop
+  jr nc,$-3 ;/
+  ex de,hl
+  ld (hl),d
+  inc hl
+
+  add a,'0'
+  ld (hl),a
+  inc hl
+  ld (hl),0
+
+;Now strip the leading zeros
+  ld c,-6
+  add hl,bc         ; hl is at the begin of buf
+  ld a,'0'
+    jr zl3
+zl4:
+    ld (hl), ' '    
+    inc hl
+zl3:
+  cp (hl) 
+  jr z,zl4          
+
+  ld hl, u16toa_d_buf
+  ret
+
+
+
+
+
+
+
+
 

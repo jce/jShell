@@ -94,6 +94,7 @@ walarm:
 w_not_ok:
     ld hl, w_not_ok_str
     call sio_prstr_nl
+    call w5500_readback
     ret
 w_not_ok_str:   .db "Parameters not correct.",0
 w_ok:
@@ -157,6 +158,8 @@ w5500_readback:
     ld hl, iptxt  \ call sio_prstr \ ld hl, SIPR \ call w5500_print_reg4
     ld hl, masktxt\ call sio_prstr \ ld hl, SUBR \ call w5500_print_reg4
     ld hl, gwtxt  \ call sio_prstr \ ld hl, GAR  \ call w5500_print_reg4
+    ld hl, sio_newline
+    call sio_prstr
     ret    
 
 mactxt  .db "MAC: ",0
@@ -166,15 +169,14 @@ gwtxt  .db "Gateway: ",0
 readbackbuf .block 6
 
 w5500_init:
-
-    ld a, 0x80  ; Chip reset command
+    ld a, 0x80              ; Chip reset command
     ld e, COMMON
     ld HL, MR
     call w5500_write8
 w5500_init_loop:
     call w5500_read8
     and 0x80
-    jr nz, w5500_init_loop    
+    jr nz, w5500_init_loop  ; Wait for reset to complete  
 
     ld a, COMMON
     ld de, 6
@@ -191,13 +193,130 @@ w5500_init_loop:
     ld BC, loc_W5500_ip
     ld HL, SIPR
     call w5500_writebuf
+
+    ld a, 2
+    call lcd_goto_line
+    ld hl, lcdstr_kachel
+    call lcd_write_string
+
+    ld a, 3
+    call lcd_goto_line
+    ld hl, lcdstr_kamer
+    call lcd_write_string
+
     ret
+
+lcdstr_kachel   .db "Tkachel       degC  ",0
+lcdstr_kamer    .db "Tkamer        degC  ",0
 
 w5500_cyclic:
+    ld e, SOCK0R        ; Check if socket 0 is opened
+    ld hl, Sn_SR
+    call w5500_read8
+    cp 0x22
+    jr z, sock_alive
+                        ; Sock still closed. Open here
+    ld e, SOCK0R
+    ld a, 0b00000010    ; Socket is UDP, use none of the blockers
+    ld hl, Sn_MR
+    call w5500_write8
+
+    ld bc, 5143         ; Set port 5143
+    ld hl, Sn_PORT
+    call w5500_write16
+
+    ld a, 0b00000001    ; Open socket command
+    ld hl, Sn_CR
+    call w5500_write8
+
     ret
 
+sock_alive:             ; Socket is open
+    ld e, SOCK0R
+    ld hl, Sn_RX_RSR
+    call w5500_read16   ; Get RX_RSR
+    ld a, l
+    or h                ; Test if there is data waiting for us
+    jr nz, sock_alive_data
+    ret
 
+frlen   .equ    32
+sock_alive_data:
+    ld (RD_RSR), hl     ; Store the amount in RX buffer
 
+    ld e, SOCK0R \ ld hl, Sn_RX_RD
+    call w5500_read16   ; Get RX_RD, The returned hl is the read pointer
+    ld (RD_RXRD), hl    ; We need it later
+
+    ld a, SOCK0RX \ ld bc, RDBUF \ ld de, frlen+8 ; ld hl, hl ; frlen+8 for there is 8byte preamble.
+    call w5500_readbuf  ; Read 40 bytes. Note that this can be different from RX_RD.
+                        ; Lucky for us, there is always 40 bytes to read, so this wont fail.
+    ld hl, (RD_RSR)
+    ld de, hl
+    ld hl, (RD_RXRD)
+    add hl, de          ; Increment the read pointer with whatever is present in cache.
+
+    ld bc, hl \ ld e, SOCK0R \ ld hl, Sn_RX_RD
+    call w5500_write16  ; Push the incremented read pointer to the W5500
+
+    ld a, 0x40 \ ld e, SOCK0R \ ld hl, Sn_CR
+    call w5500_write8   ; Call RECV on the socket.
+ 
+                        ; Test if our frame is indeed frlen bytes long
+    ld hl, (RDBUF+6)    ; What is the received frame length?
+    ld a, h \ ld h, l \ ld l, a ; Fix the big endian    
+    ld de, frlen        ; Len is the expected UDP frame length
+    or a                ;
+    sbc hl, de          ;
+    jr z, sock_alive_data_continue
+    ret
+sock_alive_data_continue:
+    
+    ; From here we have the UDP frame + preamble from the W5500 in RDBUF
+    ; There still is a checksum to evaluate, however this is omitted as the data
+    ; is not critical to any process and checking can take a lot of CPU time.
+
+;    Debug print code, to display the datagram at the shell output.
+;    ld b, 40
+;    ld hl, RDBUF
+;bufloop:
+;    ld a, (hl)
+;    call sio_uint8_hex
+;    push bc
+;    ld b, ' '
+;    call sio_prchr
+;    pop bc    
+;    inc hl
+;    djnz bufloop
+;    ld hl, sio_newline
+;    call sio_prstr
+
+    ld a, (RDBUF+16)    ; Read the alarm status from the datagram
+    ld (alarm), a       ; Store the alarm in the internal alarm location.
+
+    ld a, (RDBUF+17)    ; Read the speed from the datagram
+    ld (speed), a       ; Store the speed in the internal speed location.
+
+    ld a, (RDBUF+18)    ; Read the temperature -3/x/3 from the datagram
+    ld (color), a       ; Store in the color variable.
+
+    ld hl, (RDBUF+20)   ; Read the stove temperature from the datagram
+    ld d, l \ ld e, h   ; Big to little endian
+    call u16toa_d1      ; String goes to live in hl
+    ld a, 2 \ ld b, 7 \ call lcd_goto_line_offset
+    call lcd_write_string   ; Uses hl
+
+    ld hl, (RDBUF+22)   ; Read the room temperature from the datagram
+    ld d, l \ ld e, h   ; Big to little endian
+    call u16toa_d2      ; String goes to live in hl
+    ld a, 3 \ ld b, 7 \ call lcd_goto_line_offset
+    call lcd_write_string   ; Uses hl
+
+    ret
+
+RD_RXRD .block 2
+RD_RSR  .block 2
+RDBUF   .block 40
 
 wtest:
     print "Test function is currently empty"
