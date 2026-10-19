@@ -271,6 +271,19 @@ sock_alive_data:
     jr z, sock_alive_data_continue
     ret
 sock_alive_data_continue:
+
+    ld a, (RDBUF+8)     ; Magic number checks
+    cp 0x36
+    ret nz
+    ld a, (RDBUF+9)
+    cp 0xD2
+    ret nz
+    ld a, (RDBUF+10)
+    cp 0x18
+    ret nz
+    ld a, (RDBUF+11)
+    cp 0x8C
+    ret nz
     
     ; From here we have the UDP frame + preamble from the W5500 in RDBUF
     ; There still is a checksum to evaluate, however this is omitted as the data
@@ -317,11 +330,6 @@ sock_alive_data_continue:
 RD_RXRD .block 2
 RD_RSR  .block 2
 RDBUF   .block 40
-
-wtest:
-    print "Test function is currently empty"
-
-    ret
 
 ;===============================================================
 ; Chip interaction functions: Read/write byte/word/buf
