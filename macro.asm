@@ -77,7 +77,6 @@ skip:
     .endlocal
     .endm
 
-
 ; Stack frame open macro
 ; Takes 6 bytes of stack in addition to $size
 ; uses ix as frame pointer

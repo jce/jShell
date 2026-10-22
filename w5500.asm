@@ -425,10 +425,10 @@ w5500_readbuf_loop:
     ld a, 0x00
     out(w5500_addr+2), a
 
-    pop af
     pop hl
     pop de
     pop bc
+    pop af
     ret
 
 ; Write8 writes one byte to the W5500

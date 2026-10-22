@@ -4,6 +4,8 @@
 .ORG 0x8000
 trap_start      .equ    0x0003
 int_offs        .equ    0x80
+nv_block .equ           0xCFE6
+loc_NTP_ip .equ         0xCFE6
 loc_W5500_mac .equ      0xCFEA
 loc_W5500_ip .equ       0xCFF0
 loc_W5500_mask .equ     0xCFF4

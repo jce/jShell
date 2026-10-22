@@ -84,10 +84,10 @@ uint32tostr_dec_loop:
     ret
 
 buf_A_begin: 
-    .block 10
+    .block 12
 buf_A_end:
 buf_B_begin: 
-    .block 10
+    .block 12
 buf_B_end:
 
 ; Copied from https://github.com/Zeda/Z80-Optimized-Routines and adapted
