@@ -198,10 +198,112 @@ ntp_request_loop:
 
 ntp_interpret_timestamp:
     print "ntp_interpret_timestamp"
+    ld a, (ntp_time+0) \ ld l, a
+    ld a, (ntp_time+1) \ ld h, a
+    ld a, (ntp_time+2) \ ld e, a
+    ld a, (ntp_time+3) \ ld d, a
+    ld a, l \ sub 0x80 \ ld l, a
+    ld a, h \ sbc 0x7E \ ld h, a
+    ld a, e \ sbc 0xAA \ ld e, a
+    ld a, d \ sbc 0x83 \ ld d, a
+
+    
+    ld a, l \ ld (ntp_time+0), a
+    ld a, h \ ld (ntp_time+1), a
+    ld a, e \ ld (ntp_time+2), a
+    ld a, d \ ld (ntp_time+3), a
+
+    push hl
+    push de
+    print "unix time:"
+    ld de, ntp_time \ call uint32tostr_dec_buf
+    call sio_prstr
+    ld hl, sio_newline \ call sio_prstr
+    pop de
+    pop hl
+
+    ; Mistral helped me to this divider
+; ------------------------------------------------------------------
+; dagen_lus: DE:HL = unix-tijd
+;   uit: BC = dagen sinds 1970-01-01 (0..)
+;        DE:HL = seconden-van-vandaag (0..86399 — let op: 17 bits!)
+; ------------------------------------------------------------------
+        ld bc, 0
+day_loop:
+
+        ld a, d
+        or a
+        jr nz, day_sub        ; D >= 1 → waarde >= 2^24 → altijd aftrekken
+
+        ld a, e
+        or a
+        jr z, day_done        ; DE == 0 → rest < 65536 < 86400 → klaar
+        cp 2
+        jr nc, day_sub        ; E >= 2 → waarde >= 131072 → aftrekken
+        ; — mesgeval: D==0, E==1 → waarde = 65536 + HL vs 86400 —
+        ld a, h
+        cp 0x51
+        jr c, day_done
+        jr nz, day_sub
+        ld a, l
+        cp 0x80
+        jr c, day_done
+
+day_sub:
+        ; DE:HL -= 86400 (0x0001:0x5180)
+        ld a, l
+        sub 0x80
+        ld l, a
+        ld a, h
+        sbc 0x51
+        ld h, a
+        ld a, e
+        sbc 1
+        ld e, a
+        ld a, d
+        sbc 0
+        ld d, a
+        inc bc
+        jp day_loop
+
+day_done:
+        ; BC = dagen, DE:HL = seconden-vandaag (DE is 0 of 1)
+
+    ld (days_in_epoch), bc
+    ld (seconds_in_day+2), de
+    ld (seconds_in_day), hl
+
+;    ld hl, bc
+;    printhl "dagen:"
+    
+;    print "time of day:"
+;    ld de, seconds_in_day \ call uint32tostr_dec_buf
+;    call sio_prstr
+;    ld hl, sio_newline \ call sio_prstr
+    
+    ld d, 60
+    call EHL_Div_D
+    ; E:HL / D -> E:HL, rest A
+    ; E:HL is minutes on the day, A is 0-59, seconds in the minute
+    ld (minutes_in_day), hl
+    ld (seconds_in_minute), a
+    call EHL_Div_D
+    ; E:HL is hours on the day, A is minutes in the hour.
+    ld (minutes_in_hour), a
+    ld a, l
+    ld (hours_in_day), a
+
+    ld a, (hours_in_day) \ printa "Hour:"
+    ld a, (minutes_in_hour) \ printa "Minute:"
+    ld a, (seconds_in_minute) \ printa "Second:"
     ret
 
-
-
+days_in_epoch:      .db 2
+seconds_in_day:     .db 4
+minutes_in_day:     .db 2
+seconds_in_minute:  .db 1
+minutes_in_hour:    .db 1
+hours_in_day:       .db 1
 
 
 

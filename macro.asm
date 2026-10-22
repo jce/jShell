@@ -30,22 +30,22 @@ printhl .macro $msg
 str: db $msg , 0
 skip:
     push hl
-    push hl
     push af
     push bc
     push de
+    push hl
     ld hl, str
     call sio_prstr
     ld a, ' '
     ld b, a
     call sio_prchr
-    pop de
-    pop bc
-    pop af
     pop hl
     call sio_uint16
     ld hl, sio_newline
     call sio_prstr
+    pop de
+    pop bc
+    pop af
     pop hl
     .endlocal
     .endm
@@ -57,22 +57,22 @@ printa .macro $msg
 str: db $msg , 0
 skip:
     push hl
-    push hl
     push af
     push bc
     push de
+    push af
     ld hl, str
     call sio_prstr
     ld a, ' '
     ld b, a
     call sio_prchr
-    pop de
-    pop bc
     pop af
-    pop hl
     call sio_uint8
     ld hl, sio_newline
     call sio_prstr
+    pop de
+    pop bc
+    pop af
     pop hl
     .endlocal
     .endm
