@@ -20,6 +20,26 @@ bcdtoui8_x2:
     pop bc
     ret
 
+; Convert uint8 to BCD.
+; Input: a [0-99]
+; output: a [0x00 - 0x99]
+ui8tobcd:
+    push bc
+    ld b, 0
+ui8tobcd_loop:
+    cp 10
+    jr c, ui8tobcd_done
+    sub 10
+    inc b
+    jr ui8tobcd_loop
+ui8tobcd_done:
+    ld c, a     ; Store first digit (01) in c
+    ld a, b     ; store second digit (10) in a
+    add a, a \ add a, a \ add a, a \ add a, a ; Multiply by 16
+    or c        ; Combine with the first digit
+    pop bc
+    ret
+
 ; unsigned integer 4bits to hex string
 ; a - integer [0-15]
 ; hl - pointer to string where to write the character. Will be incremented once.

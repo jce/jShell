@@ -95,6 +95,7 @@ main_clock:
 
     ld a, 0
     ld (ctc_s_flag), a
+    call mktime
     call ctime
     ld a, 1
     call lcd_goto_line

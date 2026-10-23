@@ -2,7 +2,20 @@
 
 ds1302reg equ  0xc0
 
+; Set time based on the tm struct. The application fills
+; out tm, and then calls this function to set the clock.
+settime:
+    push af
+    ld a, (tm + 0) \ call ui8tobcd \ ld (ds1302_wv + 0), a
+    ld a, (tm + 1) \ call ui8tobcd \ ld (ds1302_wv + 1), a
+    ld a, (tm + 2) \ call ui8tobcd \ ld (ds1302_wv + 2), a
+    ld a, (tm + 3) \ call ui8tobcd \ ld (ds1302_wv + 3), a
+    ld a, (tm + 4) \ call ui8tobcd \ ld (ds1302_wv + 4), a
+    ld a, (tm + 5) \ call ui8tobcd \ ld (ds1302_wv + 6), a
+    call ds1302_write
+    pop af
 
+    ret
 ; make tm struct based on clock readout
 ; return: nothing. tm, the time struct, gets updated
 mktime:
@@ -26,37 +39,35 @@ ds1302_init:
 ctime:
     push af
     push ix
-    call ds1302_read
-    ld ix, ds1302_rv
     ld hl, ctime_buf
 
-    ld a, (ix+3)
-    call ui8tohs
+    ld a, (tm+3)
+    call uint8tostr_z2
     ld (hl), '-'
     inc hl   
-    ld a, (ix+4)
-    call ui8tohs
+    ld a, (tm+4)
+    call uint8tostr_z2
     ld (hl), '-'
     inc hl
     ld (hl), '2'
     inc hl
     ld (hl), '0'
     inc hl
-    ld a, (ix+6)
-    call ui8tohs
+    ld a, (tm+5)
+    call uint8tostr_z2
     ld (hl), ' '
     inc hl
 
-    ld a, (ix+2)
-    call ui8tohs
+    ld a, (tm+2)
+    call uint8tostr_z2
     ld (hl), ':'
     inc hl
-    ld a, (ix+1)
-    call ui8tohs
+    ld a, (tm+1)
+    call uint8tostr_z2
     ld (hl), ':'
     inc hl   
-    ld a, (ix+0)
-    call ui8tohs
+    ld a, (tm+0)
+    call uint8tostr_z2
     ld (hl), 0
     ld hl, ctime_buf
     pop ix

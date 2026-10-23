@@ -255,21 +255,25 @@ ntp_interpret_timestamp:
     call ntp_hour_minute_second
     call ntp_year_month_day
 
-
     ld a, (hours_in_day) \ printa "Hour:"
+    ld (tm+2), a
     ld a, (minutes_in_hour) \ printa "Minute:"
+    ld (tm+1), a
     ld a, (seconds_in_minute) \ printa "Second:"
+    ld (tm+0), a
     ld a, (year_1900) \ ld h, 0 \ ld l, a \ ld bc, 1900 \ add hl, bc \ printhl "Year:"
+    ld bc, 2000 \ or a \ sbc hl, bc \ ld a, l \ ld (tm+5), a
     ld a, (month) \ printa "Month:"
+    ld (tm+4), a
     ld a, (day_in_month) \ printa "Day in month:"
+    ld (tm+3), a
 
+    print "Setting clock"
+    call settime
 
     ret
 
-
 ntp_hour_minute_second:
-
-
     ; Mistral helped me to this divider (s)
     ; Bigloop: Cuts down in big steps the amount of seconds into days
         ld bc, 0
@@ -484,31 +488,4 @@ cal_mfin:
         ret
 cal_mtab:
         .db     31,28,31,30,31,30,31,31,30,31,30,31
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

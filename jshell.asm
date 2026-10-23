@@ -1,7 +1,7 @@
 jshellname:
     .db 'jShell', 0
 jshellver:
-    .db '0.5.13', 0
+    .db '0.5.14', 0
 jshellprompt:
     .db ">", 0
 
@@ -331,70 +331,71 @@ clock:
     ret
 
 clock_print_time:
+    call mktime
     call ctime
     call sio_prstr_nl
-    ;call mktime ; Fill tm struct 
-    ;ld a, (tm+0)  \  call sio_uint8_nl
-    ;ld a, (tm+1)  \  call sio_uint8_nl
-    ;ld a, (tm+2)  \  call sio_uint8_nl
-    ;ld a, (tm+3)  \  call sio_uint8_nl
-    ;ld a, (tm+4)  \  call sio_uint8_nl
-    ;ld a, (tm+5)  \  call sio_uint8_nl
     ret
 
 clock_set_time:
-    ld ix, ds1302_wv
     ld bc, hl
 
-    inc bc
-    inc bc
-    ld hl, bc
-    ld de, (hl)     ; Read the string pointer from argv.
-    ld hl, de       ;  
-    call hstoui16   ; Reads string from hl, outputs to de.
-    ld (ix+3), e
-
-    inc bc
+    inc bc          ; Day
     inc bc
     ld hl, bc
-    ld de, (hl)     ; Read the string pointer from argv.
-    ld hl, de       ;  
-    call hstoui16   ; Reads string from hl, outputs to de.
-    ld (ix+4), e
+    ld de, (hl)   ; Read the string pointer from argv.
+    ld hl, de      
+    call atoui8   ; Reads string from hl, outputs a
+    ld (tm+3), a
 
-    inc bc
+    inc bc          ; Month
     inc bc
     ld hl, bc
-    ld de, (hl)     ; Read the string pointer from argv.
-    ld hl, de       ;  
-    call hstoui16   ; Reads string from hl, outputs to de.
-    ld (ix+6), e
+    ld de, (hl)
+    ld hl, de    
+    call atoui8
+    ld (tm+4), a
 
-    inc bc
+    inc bc          ; Year
     inc bc
     ld hl, bc
-    ld de, (hl)     ; Read the string pointer from argv.
-    ld hl, de       ;  
-    call hstoui16   ; Reads string from hl, outputs to de.
-    ld (ix+2), e
+    ld de, (hl)
+    call atoui16   ; Reads string from de, outputs to hl.
+    ld de, 2000
+    or a
+    sbc hl, de
+    ld a, l
+    ld (tm+5), a
 
-    inc bc
+    inc bc          ; Hour
     inc bc
     ld hl, bc
-    ld de, (hl)     ; Read the string pointer from argv.
-    ld hl, de       ;  
-    call hstoui16   ; Reads string from hl, outputs to de.
-    ld (ix+1), e
+    ld de, (hl)
+    ld hl, de  
+    call atoui8
+    ld (tm+2), a
 
-    inc bc
+    inc bc          ; Minute
     inc bc
     ld hl, bc
-    ld de, (hl)     ; Read the string pointer from argv.
-    ld hl, de       ;  
-    call hstoui16   ; Reads string from hl, outputs to de.
-    ld (ix+0), e
+    ld de, (hl)
+    ld hl, de  
+    call atoui8
+    ld (tm+1), a
 
-    call ds1302_write
+    inc bc          ; Second
+    inc bc
+    ld hl, bc
+    ld de, (hl)
+    ld hl, de  
+    call atoui8
+    ld (tm+0), a
+
+    call settime
+    ;call mktime
+    call ctime
+    call sio_prstr_nl
+    
+    print "OK."
     ret
 
 clock_s: .db "Date and time: ",0
