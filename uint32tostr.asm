@@ -158,6 +158,19 @@ inloop:
     ld a,d
     ret
 
+; Aaand we need it for signed as well.
+atosi8:
+strtos8:
+    ld a, (hl)
+    cp '-'
+    jr nz, s8_pos
+    inc hl
+    call atoui8
+    neg
+    ret
+s8_pos:
+    jp atoui8
+
 
 ;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 ; More Zeda, needed is a fixed-width-string from uint16, that displays a decimal dot on

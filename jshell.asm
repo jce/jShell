@@ -1,7 +1,7 @@
 jshellname:
     .db 'jShell', 0
 jshellver:
-    .db '0.5.12', 0
+    .db '0.5.13', 0
 jshellprompt:
     .db ">", 0
 
@@ -48,6 +48,7 @@ ccolor:.db "color",0
 calarm:.db "alarm",0
 cntpip:.db "ntpip",0
 cntp:  .db "ntp",0
+cntpoffs:.db "ntpoffset",0
 
 commands:
     .dw c_,     help
@@ -93,6 +94,7 @@ commands:
     .dw calarm,walarm
     .dw cntpip,ntpip
     .dw cntp  ,ntp
+    .dw cntpoffs  ,ntpoffs
     .dw 0, 0
 
 error:
@@ -145,6 +147,7 @@ help:
     ld hl, helpw7       \ call sio_prstr_nl
     ld hl, helpw8       \ call sio_prstr_nl
     ld hl, helpw9       \ call sio_prstr_nl
+    ld hl, helpw10      \ call sio_prstr_nl
     ret
 help0: .db "Help function.", 0
 help1: .db " ", 0
@@ -184,7 +187,8 @@ helpw5:.db "speed [0-255] - Set animation speed (during no UDP PLC connection)",
 helpw6:.db "color [0-255] - Set animation color (during no UDP PLC connection)", 0
 helpw7:.db "alarm [0-1] - Set animation to alarm mode (during no UDP PLC connection)", 0
 helpw8:.db "ntpip [a b c d] - Set or view NTP server ip", 0
-helpw9:.db "ntp - Future development", 0
+helpw9:.db "ntp - Gets NTP time", 0
+helpw10:.db "ntpoffset [-12 - 12] - Sets UTC offset in hours", 0
 
 ; A command gets argc in e and argv in hl
 
