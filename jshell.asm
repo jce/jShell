@@ -45,7 +45,7 @@ cmask: .db "mask", 0
 cgw:   .db "gw",0
 cspeed:.db "speed",0
 ccolor:.db "color",0
-calarm:.db "alarm",0
+cflags:.db "flags",0
 cntpip:.db "ntpip",0
 cntp:  .db "ntp",0
 cntpoffs:.db "ntpoffset",0
@@ -91,7 +91,7 @@ commands:
     .dw cgw,   wgw
     .dw cspeed,wspeed
     .dw ccolor,wcolor
-    .dw calarm,walarm
+    .dw cflags,wflags
     .dw cntpip,ntpip
     .dw cntp  ,ntp
     .dw cntpoffs  ,ntpoffs
@@ -185,7 +185,7 @@ helpw3:.db "mask - [a b c d] get or view the w5500 netmask", 0
 helpw4:.db "gw - [a b c d] get or view the w5500 gateway IP", 0
 helpw5:.db "speed [0-255] - Set animation speed (during no UDP PLC connection)", 0
 helpw6:.db "color [0-255] - Set animation color (during no UDP PLC connection)", 0
-helpw7:.db "alarm [0-1] - Set animation to alarm mode (during no UDP PLC connection)", 0
+helpw7:.db "flags [0-1] - Set animation to alarm mode (during no UDP PLC connection)", 0
 helpw8:.db "ntpip [a b c d] - Set or view NTP server ip", 0
 helpw9:.db "ntp - Gets NTP time", 0
 helpw10:.db "ntpoffset [-12 - 12] - Sets UTC offset in hours", 0

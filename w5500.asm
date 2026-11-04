@@ -84,11 +84,11 @@ wcolor:
     digit color
     jp w_ok
 
-walarm:
+wflags:
     ld a, e
     cp 2
     jp nz, w_not_ok
-    digit alarm
+    digit flags
     jp w_ok
 
 w_not_ok:
@@ -104,7 +104,11 @@ w_ok:
 w_ok_str:   .db "OK.",0
 speed: .db 10
 color: .db 0x80
-alarm: .db 0
+flags: .db 0    ; Bit 0: Alarm. Bit 1: Bell.
+Pa: .db 0
+Pb: .db 0
+Pc: .db 0
+
 ;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 w5500_print_reg4:
@@ -304,13 +308,13 @@ sock_alive_data_continue:
 ;    ld hl, sio_newline
 ;    call sio_prstr
 
-    ld a, (RDBUF+16)    ; Read the alarm status from the datagram
-    ld (alarm), a       ; Store the alarm in the internal alarm location.
+    ld a, (RDBUF+16)    ; Read the flags from the datagram
+    ld (flags), a       ; Store the flags in the internal flags location.
 
-    ld a, (RDBUF+17)    ; Read the speed from the datagram
+    ld a, (RDBUF+18)    ; Read the speed from the datagram
     ld (speed), a       ; Store the speed in the internal speed location.
 
-    ld a, (RDBUF+18)    ; Read the temperature -3/x/3 from the datagram
+    ld a, (RDBUF+19)    ; Read the temperature -3/x/3 from the datagram
     ld (color), a       ; Store in the color variable.
 
     ld hl, (RDBUF+20)   ; Read the stove temperature from the datagram
@@ -324,6 +328,15 @@ sock_alive_data_continue:
     call u16toa_d2      ; String goes to live in hl
     ld a, 3 \ ld b, 7 \ call lcd_goto_line_offset
     call lcd_write_string   ; Uses hl
+
+    ld a, (RDBUF+24)    ; Read the temperature -3/x/3 from the datagram
+    ld (Pa), a       ; Store in the color variable.
+
+    ld a, (RDBUF+25)    ; Read the temperature -3/x/3 from the datagram
+    ld (Pb), a       ; Store in the color variable.
+
+    ld a, (RDBUF+26)    ; Read the temperature -3/x/3 from the datagram
+    ld (Pc), a       ; Store in the color variable.
 
     ret
 

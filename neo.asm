@@ -6,7 +6,6 @@ neo_port:   .equ    0xA0    ; Port where the neopixel driver is located
 neopixel_commands:
     .dw 0x0001, s_clock,    neo_paint_clock
     .dw 0x0002, s_tape,     neo_paint_tape
-    .dw 0x0003, s_stargate, neo_paint_sg
     .dw 0x0004, s_sg,       neo_paint_sg
     .dw 0x0005, s_star,     neo_paint_star
     .dw 0x0006, s_tape2,    neo_paint_tape2
@@ -24,18 +23,18 @@ neopixel_commands:
     .dw 0x0012, s_dtape4,   neo_paint_dtape4
     .dw 0x0013, s_dtape5,   neo_paint_dtape5
     .dw 0x0014, s_dtape6,   neo_paint_dtape6
+    .dw 0x0015, s_dp,       neo_paint_dp
     .dw 0x0000
 
 s_clock:    .db "clock",0
 s_tape:     .db "tape",0
-s_stargate: .db "stargate",0
 s_sg:       .db "sg",0
 s_star:     .db "star",0
-s_tape2:    .db "tape2",0
-s_tape3:    .db "tape3",0
-s_tape4:    .db "tape4",0
-s_tape5:    .db "tape5",0
-s_tape6:    .db "tape6",0
+s_tape2:    .db "t2",0
+s_tape3:    .db "t3",0
+s_tape4:    .db "t4",0
+s_tape5:    .db "t5",0
+s_tape6:    .db "t6",0
 s_rrod:     .db "rrod",0
 s_rainbow:  .db "rb",0
 s_rb2:      .db "rb2",0
@@ -46,6 +45,7 @@ s_dtape3:   .db "dt3",0
 s_dtape4:   .db "dt4",0
 s_dtape5:   .db "dt5",0
 s_dtape6:   .db "dt6",0
+s_dp:       .db "dp",0
 
 neo_mode:       .db     0x80 + 0x11
 neo_bright:     .db     0x04
@@ -182,6 +182,7 @@ neo_print_commands_loop:
 .include "neo_rodo.asm"
 .include "neo_drodo.asm"
 .include "neo_dtape.asm"
+.include "neo_dp.asm"
 ;------------------------------------------------------------------------------------------------------
 
 ; Scale every color of every pixel according to neo_bright

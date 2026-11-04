@@ -1,9 +1,11 @@
 ; Rotating tape reel animation. Divides the circle in 240 points, each 4 points are for one LED.
 ; Deposits some activation in some points, logic is per point instead of per LED.
 neo_paint_dtape .macro &n
-    ld a, (alarm)
-    or a
+    ld a, (flags)
+    bit 0, a
     jp nz, neo_paint_d_alarm
+    bit 1, a
+    jp nz, neo_paint_d_bell
     call dtape_common
 
     ; Calculate the limits for q1
