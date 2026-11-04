@@ -17,44 +17,32 @@ neo_paint_dp:
     ld a, 0x00 \ ld (neo_col_g), a
     ld a, 0x00 \ ld (neo_col_r), a
     ld a, (neo_bright) \ ld (neo_col_b), a
-    ld a, (neo_dp_posa) \ add a,0 \ srl a \ srl a \ call neo_grb_pixel3 
-    ld a, (neo_dp_posa) \ add a,1 \ srl a \ srl a \ call neo_grb_pixel3
-    ld a, (neo_dp_posa) \ add a,2 \ srl a \ srl a \ call neo_grb_pixel3
-    ld a, (neo_dp_posa) \ add a,3 \ srl a \ srl a \ call neo_grb_pixel3
-    ld a, (neo_dp_posa) \ add a,4 \ srl a \ srl a \ call neo_grb_pixel3
-    ld a, (neo_dp_posa) \ add a,5 \ srl a \ srl a \ call neo_grb_pixel3
-    ld a, (neo_dp_posa) \ add a,6 \ srl a \ srl a \ call neo_grb_pixel3
-    ld a, (neo_dp_posa) \ add a,7 \ srl a \ srl a \ call neo_grb_pixel3
-    ld a, (neo_dp_posa) \ add a,8 \ srl a \ srl a \ call neo_grb_pixel3
+    ld ix, neo_dp_posa \ call neo_dot
 
     ld a, 0x00 \ ld (neo_col_g), a
     ld a, (neo_bright) \ ld (neo_col_r), a
     ld a, 0x00 \ ld (neo_col_b), a
-    ld a, (neo_dp_posb) \ add a,0 \ srl a \ srl a \ call neo_grb_pixel3 
-    ld a, (neo_dp_posb) \ add a,1 \ srl a \ srl a \ call neo_grb_pixel3
-    ld a, (neo_dp_posb) \ add a,2 \ srl a \ srl a \ call neo_grb_pixel3
-    ld a, (neo_dp_posb) \ add a,3 \ srl a \ srl a \ call neo_grb_pixel3
-    ld a, (neo_dp_posb) \ add a,4 \ srl a \ srl a \ call neo_grb_pixel3
-    ld a, (neo_dp_posb) \ add a,5 \ srl a \ srl a \ call neo_grb_pixel3
-    ld a, (neo_dp_posb) \ add a,6 \ srl a \ srl a \ call neo_grb_pixel3
-    ld a, (neo_dp_posb) \ add a,7 \ srl a \ srl a \ call neo_grb_pixel3
-    ld a, (neo_dp_posb) \ add a,8 \ srl a \ srl a \ call neo_grb_pixel3
+    ld ix, neo_dp_posb \ call neo_dot
 
     ld a, (neo_bright) \ ld (neo_col_g), a
     ld a, 0x00 \ ld (neo_col_r), a
     ld a, 0x00 \ ld (neo_col_b), a
-    ld a, (neo_dp_posc) \ add a,0 \ srl a \ srl a \ call neo_grb_pixel3 
-    ld a, (neo_dp_posc) \ add a,1 \ srl a \ srl a \ call neo_grb_pixel3
-    ld a, (neo_dp_posc) \ add a,2 \ srl a \ srl a \ call neo_grb_pixel3
-    ld a, (neo_dp_posc) \ add a,3 \ srl a \ srl a \ call neo_grb_pixel3
-    ld a, (neo_dp_posc) \ add a,4 \ srl a \ srl a \ call neo_grb_pixel3
-    ld a, (neo_dp_posc) \ add a,5 \ srl a \ srl a \ call neo_grb_pixel3
-    ld a, (neo_dp_posc) \ add a,6 \ srl a \ srl a \ call neo_grb_pixel3
-    ld a, (neo_dp_posc) \ add a,7 \ srl a \ srl a \ call neo_grb_pixel3
-    ld a, (neo_dp_posc) \ add a,8 \ srl a \ srl a \ call neo_grb_pixel3
+    ld ix, neo_dp_posc \ call neo_dot
 
     ret
 
+; Single neopixel dot painter. Set IX to the correct position value.
+neo_dot:
+    ld a, (ix) \ add a,0 \ srl a \ srl a \ call neo_grb_pixel3 
+    ld a, (ix) \ add a,1 \ srl a \ srl a \ call neo_grb_pixel3
+    ld a, (ix) \ add a,2 \ srl a \ srl a \ call neo_grb_pixel3
+    ld a, (ix) \ add a,3 \ srl a \ srl a \ call neo_grb_pixel3
+    ld a, (ix) \ add a,4 \ srl a \ srl a \ call neo_grb_pixel3
+    ld a, (ix) \ add a,5 \ srl a \ srl a \ call neo_grb_pixel3
+    ld a, (ix) \ add a,6 \ srl a \ srl a \ call neo_grb_pixel3
+    ld a, (ix) \ add a,7 \ srl a \ srl a \ call neo_grb_pixel3
+    ld a, (ix) \ add a,8 \ srl a \ srl a \ call neo_grb_pixel3
+    ret
     
 ; Param: ix points to the data block.
 neo_dp_calc_pos:
@@ -70,7 +58,7 @@ neo_dp_calc_pos:
     ; pos = posw * 240 / 65536  which are [posw * 240] and [>> 16]
     ex de, hl
     ld hl, 240 \ ld bc, hl
-    call Mul16              ; DEHL=BC*DE. D will be empty for B was 0.
+    call Mul16              ; DEHL=BC*DE. D will be 0 for B was 0.
     ld a, e
     ld (ix+4), a
     ret
