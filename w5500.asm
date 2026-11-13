@@ -338,11 +338,20 @@ sock_alive_data_continue:
     ld a, (RDBUF+26)    ; Read the temperature -3/x/3 from the datagram
     ld (Pc), a       ; Store in the color variable.
 
+    ld hl, ctc_s_counter    ; Copy the receive timestamp
+    ld de, rcv_d_timestamp  ; in rcv_d_timestamp
+    ld bc, 4
+    di
+    ldir
+    ei
+
     ret
 
 RD_RXRD .block 2
 RD_RSR  .block 2
 RDBUF   .block 40
+rcv_d_timestamp: .block 4   ; Timestap when the last domotics package was received
+
 
 ;===============================================================
 ; Chip interaction functions: Read/write byte/word/buf

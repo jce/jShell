@@ -106,6 +106,25 @@ Sub16:
     sbc hl, de  ; Sub with carry
     ret
 
+Sub32:                  ; (bc) = (de) - (hl) - Only writes (bc)
+    push af
+    push bc
+    push de
+    push hl
+    or a                ; Clear carry
+    ld a, (de) \ sbc (hl) \ ld (bc), a
+    inc bc \ inc de \ inc hl
+    ld a, (de) \ sbc (hl) \ ld (bc), a
+    inc bc \ inc de \ inc hl
+    ld a, (de) \ sbc (hl) \ ld (bc), a
+    inc bc \ inc de \ inc hl
+    ld a, (de) \ sbc (hl) \ ld (bc), a
+    pop hl
+    pop de
+    pop bc
+    pop af
+    ret 
+
 ; Similar to Sub16, but does not change HL. Sets flags.
 Cmp16:
     push hl

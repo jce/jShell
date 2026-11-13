@@ -1,4 +1,44 @@
 ; Alarm display for domotics. Draws an on/off blinking circle filled with red.
+neo_paint_d_dc:             ; Display for disconnection state.
+    ld a, (ctc_ms_counter)
+    cp 50
+    jr nc, dc_dark          ; Dark for 50-99 [10ms]
+
+    ld a, (neo_bright)      ; Prepare the colors, white
+    srl a \ srl a           ; Just 1/4 of intensity * 3 contributions is 3/4, close to 1
+    ld (neo_col_g), a
+    ld (neo_col_b), a
+    ld (neo_col_r), a
+
+    ld b, 60                ; 60 is allowed for pixel3 wraps around 60
+dc_loop:
+    ld a, b
+    call neo_grb_pixel3
+    djnz alarm_loop
+
+dc_dark:                    ; Nothing needs to be done for a dark alarm
+    ret
+
+d_dc_test:                  ; Test function to see if we are disconnected. Sets nonzero flag if DC.
+    ld bc, d_dc_test_cnt
+    ld de, ctc_s_counter
+    ld hl, rcv_d_timestamp
+    call Sub32              ; (bc) = (de) - (hl)
+    inc bc \ ld a, (bc) \ or a \ ret nz
+    inc bc \ ld a, (bc) \ or a \ ret nz
+    inc bc \ ld a, (bc) \ or a \ ret nz
+    ld a, (d_dc_test_cnt)
+    cp 3
+    jr nc, dc_yes
+    xor a
+    ret
+dc_yes:
+    ld a, 1
+    or a
+    ret
+
+d_dc_test_cnt:  .block 4    ; Counter to compare with uptime
+
 neo_paint_d_alarm:
     ld a, (ctc_ms_counter)
     cp 50
@@ -40,6 +80,8 @@ bell_loop:
 ; Rotating dot (rodo) animation. Divides the circle in 240 points, each 4 points are for one LED.
 ; Deposits some activation in some points, logic is per point instead of per LED.
 neo_paint_drodo:
+    call d_dc_test
+    jp nz, neo_paint_d_dc
     ld a, (flags)
     bit 0, a
     jp nz, neo_paint_d_alarm

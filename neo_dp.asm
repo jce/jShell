@@ -2,6 +2,8 @@
 ; Rotating dot (rodo) animation. Divides the circle in 240 points, each 4 points are for one LED.
 ; Deposits some activation in some points, logic is per point instead of per LED.
 neo_paint_dp:
+    call d_dc_test
+    jp nz, neo_paint_d_dc
     ld a, (flags)
     bit 0, a
     jp nz, neo_paint_d_alarm
