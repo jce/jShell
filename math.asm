@@ -111,8 +111,7 @@ Sub32:                  ; (bc) = (de) - (hl) - Only writes (bc)
     push bc
     push de
     push hl
-    or a                ; Clear carry
-    ld a, (de) \ sbc (hl) \ ld (bc), a
+    ld a, (de) \ sub (hl) \ ld (bc), a
     inc bc \ inc de \ inc hl
     ld a, (de) \ sbc (hl) \ ld (bc), a
     inc bc \ inc de \ inc hl
